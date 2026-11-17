@@ -1,0 +1,21 @@
+{
+  "name": "gara-viitorului-pascani",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vite build",
+    "preview": "vite preview --host",
+    "data": "node scripts/fetch-osm.mjs && node scripts/fetch-dem.mjs && node scripts/clean-buildings.mjs && node scripts/fetch-satellite.mjs",
+    "data:api": "node scripts/fetch-osm-api.mjs && node scripts/clean-buildings.mjs",
+    "data:clean": "node scripts/clean-buildings.mjs",
+    "data:sat": "node scripts/fetch-satellite.mjs"
+  },
+  "dependencies": {
+    "three": "^0.170.0"
+  },
+  "devDependencies": {
+    "vite": "^5.4.11"
+  }
+}

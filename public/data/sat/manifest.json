@@ -1,0 +1,28 @@
+{
+  "source": "Sentinel-2 cloudless 2016 (EOX, s2cloudless_3857)",
+  "license": "CC BY 4.0",
+  "attribution": "Sentinel-2 cloudless – s2maps.eu, EOX IT Services GmbH (date Copernicus Sentinel 2016 modificate)",
+  "tileSize": 256,
+  "bbox": {
+    "west": 26.6,
+    "east": 26.85,
+    "north": 47.33,
+    "south": 47.18
+  },
+  "levels": [
+    {
+      "z": 13,
+      "x0": 4701,
+      "x1": 4706,
+      "y0": 2870,
+      "y1": 2875
+    },
+    {
+      "z": 14,
+      "x0": 9402,
+      "x1": 9413,
+      "y0": 5740,
+      "y1": 5750
+    }
+  ]
+}

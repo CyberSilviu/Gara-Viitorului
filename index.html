@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Gara Viitorului · Pașcani</title>
+  <meta name="description" content="Gara Pașcani a viitorului – model 3D interactiv: gară 3 în 1, tren ușor spre nodul A7/A8, energie verde." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b1220'/%3E%3Cpath d='M14 40h36l-6-18H20z' fill='%2322d3ee'/%3E%3Ccircle cx='24' cy='46' r='4' fill='%234ade80'/%3E%3Ccircle cx='40' cy='46' r='4' fill='%234ade80'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <div id="app"></div>
+
+  <!-- Ecran de incarcare -->
+  <div id="loader">
+    <div class="loader-card">
+      <div class="brand big"><span class="logo"></span><div><b>Gara Viitorului</b><small>Pașcani · 2040</small></div></div>
+      <div class="bar"><i id="loader-bar"></i></div>
+      <p id="loader-text">Se pregătește scena…</p>
+      <p class="credit">Hartă: © OpenStreetMap contributors · Clădiri: OSM + Microsoft Building Footprints · Relief: SRTM · Satelit: Sentinel-2 cloudless (EOX), Esri World Imagery</p>
+    </div>
+  </div>
+
+  <!-- Bara de sus -->
+  <header class="topbar">
+    <div class="brand"><span class="logo"></span><div><b>Gara Viitorului</b><small>Pașcani · gară 3 în 1</small></div></div>
+    <nav class="modes" id="modes">
+      <button data-mode="orbit" class="active" title="Vedere de ansamblu (tasta 1)"><span>🛰</span>Vedere aeriană</button>
+      <button data-mode="walk" title="Intră în gară (tasta 2)"><span>🚶</span>Plimbare în gară</button>
+      <button data-mode="ride" title="Călătorie cu trenul ușor (tasta 3)"><span>🚈</span>Tren ușor → Nod A7/A8</button>
+      <button data-mode="tour" title="Tur ghidat pentru prezentare (tasta 4)"><span>🎤</span>Tur ghidat</button>
+    </nav>
+    <div class="top-actions">
+      <div class="era" id="era" role="group" aria-label="Compară gara de azi cu gara viitorului (tasta V)">
+        <button data-era="azi" title="Gara de azi (clădirea și peroanele existente)">Azi</button>
+        <button data-era="viitor" class="active" title="Gara viitorului">Viitor</button>
+      </div>
+      <button id="btn-places" class="ghost" title="Salt rapid">📍 Locuri</button>
+      <button id="btn-help" class="ghost" title="Ajutor">?</button>
+    </div>
+  </header>
+
+  <!-- Meniu locuri -->
+  <div id="places" class="popover hidden"></div>
+
+  <!-- Panou de informatii (explicatii solutii) -->
+  <aside id="panel" class="panel hidden">
+    <button class="close" id="panel-close" aria-label="Închide">×</button>
+    <div class="panel-cat" id="panel-cat"></div>
+    <h2 id="panel-title"></h2>
+    <div id="panel-body"></div>
+    <div class="panel-actions">
+      <button id="panel-view" class="primary">🎥 Vezi de aproape</button>
+      <button id="panel-walk" class="ghost">🚶 Mergi acolo</button>
+    </div>
+  </aside>
+
+  <!-- Legenda categorii -->
+  <div id="legend" class="legend"></div>
+
+  <!-- Harta mica -->
+  <div class="minimap-wrap">
+    <canvas id="minimap" width="260" height="260"></canvas>
+    <div class="minimap-cap"><span>N ↑</span><span id="mm-scale">1 km</span></div>
+  </div>
+
+  <!-- Tablou energie + ora -->
+  <section id="dash" class="dash">
+    <div class="dash-row">
+      <label>Ora <b id="hour-label">11:00</b></label>
+      <input type="range" id="hour" min="0" max="24" step="0.25" value="11" />
+      <button id="btn-play-time" class="mini" title="Derulează ziua">▶</button>
+      <button id="dash-toggle" class="mini" title="Arată / ascunde tabloul energetic">⌄</button>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><small>Producție solară</small><b id="k-pv">–</b></div>
+      <div class="kpi"><small>Consum gară</small><b id="k-load">–</b></div>
+      <div class="kpi"><small>Baterie</small><b id="k-bat">–</b></div>
+      <div class="kpi"><small>CO₂ evitat azi</small><b id="k-co2">–</b></div>
+    </div>
+    <canvas id="energy-chart" width="300" height="70"></canvas>
+    <div class="dash-row toggles">
+      <label class="chk"><input type="checkbox" id="t-labels" checked /> Etichete</label>
+      <label class="chk"><input type="checkbox" id="t-future" checked /> Gara viitorului</label>
+      <label class="chk"><input type="checkbox" id="t-routes" checked /> Trasee</label>
+      <label class="chk"><input type="checkbox" id="t-sat" checked /> Satelit</label>
+    </div>
+  </section>
+
+  <!-- HUD plimbare -->
+  <div id="hud" class="hud hidden">
+    <div class="crosshair"></div>
+    <div class="hud-hint" id="hud-hint">Click pe scenă pentru a privi cu mouse-ul · <b>W A S D</b> deplasare · <b>Shift</b> alergare · <b>Esc</b> eliberează mouse-ul</div>
+    <div class="touch-pad" id="touch-pad">
+      <button data-dir="f">▲</button><button data-dir="l">◀</button><button data-dir="b">▼</button><button data-dir="r">▶</button>
+    </div>
+  </div>
+
+  <!-- Bara calatorie -->
+  <div id="ride-bar" class="ride-bar hidden">
+    <div class="ride-info"><b id="ride-title">Tren ușor T1 · Gara Pașcani → Hub A7/A8</b><span id="ride-status"></span></div>
+    <div class="ride-progress"><i id="ride-progress"></i><div id="ride-stops"></div></div>
+    <div class="ride-controls">
+      <button id="ride-cam" class="ghost">🎥 Cameră: cabină</button>
+      <button id="ride-speed" class="ghost">⏩ Viteză x1</button>
+      <button id="ride-pause" class="ghost">⏸</button>
+    </div>
+  </div>
+
+  <!-- Tur ghidat -->
+  <div id="tour-bar" class="tour-bar hidden">
+    <button id="tour-prev" class="ghost">◀</button>
+    <div class="tour-text"><small id="tour-step"></small><b id="tour-title"></b><p id="tour-desc"></p></div>
+    <button id="tour-next" class="primary">▶</button>
+    <button id="tour-auto" class="ghost" title="Redare automată">⏯</button>
+  </div>
+
+  <!-- Ajutor -->
+  <div id="help" class="modal hidden">
+    <div class="modal-card">
+      <button class="close" id="help-close">×</button>
+      <h2>Cum se folosește</h2>
+      <ul>
+        <li><b>Vedere aeriană</b> – trage cu mouse-ul pentru rotire, rotița pentru zoom, click-dreapta pentru deplasare.</li>
+        <li><b>Plimbare în gară</b> – intră în holul gării: click pe scenă, apoi <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> și mouse-ul. <kbd>Shift</kbd> = alergare, <kbd>Space</kbd> = săritură, <kbd>Esc</kbd> = ieșire.</li>
+        <li><b>Tren ușor</b> – urcă în vagonul care merge de la gară până la hub-ul de la nodul autostrăzilor A7 × A8.</li>
+        <li><b>Tur ghidat</b> – prezentarea pentru gală: fiecare soluție, explicată pe rând.</li>
+        <li>Punctele colorate din scenă sunt <b>soluțiile propuse</b>. Click pe ele pentru explicație: <i>ce este, de ce am ales-o, ce avantaj aduce</i>.</li>
+        <li>Taste rapide: <kbd>1</kbd>–<kbd>4</kbd> moduri, <kbd>H</kbd> etichete, <kbd>N</kbd> zi/noapte, <kbd>V</kbd> azi / viitor.</li>
+        <li><b>Azi / Viitor</b> (dreapta sus) – compară gara de astăzi cu gara viitorului.</li>
+      </ul>
+      <p class="credit">Clădiri, străzi, căi ferate, râuri: © OpenStreetMap contributors (ODbL); clădiri suplimentare: Microsoft Global ML Building Footprints (ODbL). Relief: SRTM 30 m (NASA) via OpenTopoData. Imagini satelitare: Sentinel-2 cloudless – s2maps.eu, EOX IT Services GmbH (date Copernicus Sentinel 2016 modificate), CC BY 4.0; detaliu: Esri, Maxar, Earthstar Geographics, GIS User Community. Proiect școlar „Gara viitorului”.</p>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

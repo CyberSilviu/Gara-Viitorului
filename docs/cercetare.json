@@ -1,0 +1,511 @@
+{
+  "station": {
+    "station_lat": 47.25689,
+    "station_lon": 26.72403,
+    "building_orientation_deg": 158.3,
+    "building_description": "LOCATION AND GEOMETRY (high confidence; from the OSM way 841790852 polygon, computed by me):\n- Passenger building \"Gara Pascani\". Footprint centroid is 47.25689, 26.72403, which matches Nominatim (47.25689, 26.72403). Its bbox runs from lat 47.25639 to 47.25743 and lon 26.72360 to 26.72442.\n- The OSM railway=station node \"Pașcani\" (id 3120900494, uic_ref 5351358, operator CFR) is at 47.25691, 26.72454, on the track side.\n- Ground elevation is about 213.6 m (EU-DEM 25 m via opentopodata).\n- The long axis runs at a bearing of 158.3 / 338.3 deg (NNW–SSE), parallel to the tracks.\n- Overall size is about 116 m long and about 20 m deep.\n\nFootprint vertices, in lat,lon order going around the polygon:\n47.25736,26.72360; 47.25743,26.72385; 47.25645,26.72442; 47.25639,26.72418; 47.25650,26.72411; 47.25651,26.72417; 47.25682,26.72399; 47.25680,26.72394; 47.25695,26.72384; 47.25697,26.72389; 47.25727,26.72371; 47.25725,26.72366.\n\nPlan shape (computed from the polygon):\n- The EAST (track) façade is one straight wall of about 116 m.\n- The WEST (town/square) façade is stepped, from north to south:\n  - end pavilion, about 12.6 m long, full depth about 20 m\n  - wing, about 36 m long, set back about 4.6 m (depth about 15.5 m)\n  - central body, about 18.3 m long, full depth about 20 m, projecting toward the square\n  - wing, about 36 m long, set back about 4.6 m\n  - end pavilion, about 13.2 m long, full depth about 20 m\n- This matches the CFR tender wording \"corp central si cele doua corpuri laterale\" (central body and two side wings).\n\nARCHITECTURE (medium confidence; my own reading of the 2009 Commons photo Gara_Pascani.jpg):\n- Mostly a single storey: a long ground-floor hall with a continuous arcade/portico of square concrete pillars on the platform side and a flat canopy over platform 1.\n- A two-storey block with a hipped roof (grey sheet or tile, small dormers) and a two-storey end pavilion rise above it.\n- Walls are plastered and painted light grey/off-white, with a plain, sober 20th-century look (possibly post-war or interwar; this is not verified).\n- A blue CFR \"PAȘCANI\" sign and a clock hang on the platform façade. Ground-floor shops include a \"FAST FOOD\" unit.\n- Platforms are paved with red concrete pavers, with globe-lamp lighting posts and catenary masts.\n- Architect, exact construction year and heritage (LMI) status: NOT FOUND in any source checked. ro.wikipedia's \"Gara Pașcani\" article is a stub with no history.\n\nHISTORY:\n- The railway reached Pașcani with the Lemberg–Czernowitz–Jassy company's Roman–Pașcani–Iași line in 1869–1870. The Pașcani–Iași section was completed in May 1870 (iasi.travel; local history pieces). Medium-high confidence.\n- An Illustrated London News engraving dated 30 Dec 1876 shows an earlier station building (\"Russian volunteers at the railway station, Paschkanyi\").\n- Newsweek.ro (2025) lists Pașcani among the Lemberg–Czernowitz company's junction stations with \"more refined architectural compositions\". That applies to the original typology; the present building looks later.\n- The CFR railway workshops on Str. Garii date from 1876 and are listed as a monument (ro.wikipedia \"Pașcani\"). They employed more than 1,000 people in 1925. Today they are Electroputere VFU Pașcani, which modernised 42 CFR Calatori coaches under PNRR (completed June 2026). This is a coach-modernisation project, not a station project.\n\nCURRENT STATE AND RENOVATION (high confidence for the tender facts):\n- No PNRR project for the station building was found.\n- CFR SA tendered \"Modernizarea statiei CF Pascani\" in July 2023 (capital.ro and antena3.ro, 6–7 Jul 2023). Funding was non-reimbursable money from the Programul Transporturi (PT). Value was 33.98 million lei excl. VAT (about 7 M EUR).\n- Tender scope:\n  - consolidation and modernisation of the passenger building (central body plus two lateral wings)\n  - reorganisation of the passenger, commercial and operational spaces\n  - rebuilding the main platform in front of the building to 250 m x 6 m, with canopies over the central and lateral bodies\n  - ramps and tactile strips for people with reduced mobility\n  - a pedestrian level crossing at the station's \"X\" end\n  - a modern passenger information system and modern platform lighting\n  - a car park in front of the station\n- Timeline: 25 months (6 design + 4 approvals + 18 works + 1 handover), with a 60-month warranty.\n- Status: bzi.ro reported on 5 Jan 2024 that the works tender was annulled because the single bid was non-compliant. The consultancy/supervision tender (616,610 lei) was being relaunched for the 3rd time (deadline 30 Jan 2024). The project was described as blocked.\n- No news after 2024 about a signed contract was found. Treat the station as NOT yet modernised (medium confidence).\n\nRelated corridor study:\n- CFR finished a feasibility study for modernising the Pașcani–Darmanesti section of line 500 (71 km) on 31 Mar 2025. SMIS 151660, value 6.216 M lei, POIM funding.\n- Target: double track, 25 kV, interoperable, 120–160 km/h for passenger trains, 100–120 km/h for freight. TEN-T Core, Pan-European Corridor IX.",
+    "tracks_platforms": "OSM cross-section perpendicular to the tracks through the building centre (computed by me from OSM; high confidence for geometry, medium for track roles). Offsets are measured eastward (bearing 68 deg) from the building centreline. The building spans -10 m to +10 m.\n\nPlatforms and tracks, west to east:\n- +10 m: east (track-side) wall of the building.\n- About +17 m: platform 1, a side platform along the building (OSM way 481440039, about 313 m long, bearing 158 deg). Per the 2009 photo it is covered by the building's portico canopy.\n- About +21 m: track tagged ref 517 (Pașcani – Târgu Neamț line, electrified in the OSM tag).\n- About +25 m: line 500 main track (way 807803275).\n- About +26.5 to +32 m: island platform 2, about 5.7 m wide (way 481440037).\n- About +34 m: line 500 main track (way 481440027).\n- About +38 m: line 606 main track toward Iași (way 940006947).\n- About +40 to +46 m: island platform 3, about 6.5 m wide (way 481440036).\n- About +48 and +51 m: two electrified sidings (ways 481440032, 481440845).\n- About +57 and +62 m: yard tracks.\n- About +180 m: spurs into the Electroputere VFU works.\n\nSummary:\n- About 5 through passenger tracks plus about 2 electrified sidings at the passenger station.\n- 3 platforms: 1 side platform and 2 island platforms.\n- The catenary is 25 kV AC (contact_line).\n\nBuilding side:\n- The passenger building is on the WEST side of the tracks, the town side facing Str. Garii / Str. Ceferistilor.\n\nCrossing the tracks:\n- There is NO underpass at the station.\n- In the photo, platforms are reached at grade, by walkways across the tracks.\n- A pedestrian footbridge crosses the whole track bundle about 400 m north of the building (OSM way 848190254, bridge=yes, footway, layer 1). It runs from 47.26073, 26.72186 to 47.26096, 26.72257 and is about 57 m long. It is visible in the 2009 photo.\n- The 2023 modernisation plan adds a pedestrian level crossing at the X end, ramps and tactile strips.\n\nLines served:\n- CFR Magistrala 500 (București Nord – Ploiești Sud – Adjud – Bacău – Roman – Pașcani – Suceava – Vicșani). Pașcani is at km 386+191 (bzi.ro).\n- Line 606 Pașcani – Târgu Frumos – Iași, 76 km (OSM ref 606; Wikipedia \"CFR Line 600\" lists 606 as Iași – Târgu Frumos – Pașcani).\n- Line 517 Pașcani – Târgu Neamț (OSM ref 517; ro.wikipedia lists a secondary line to Târgu Neamț).\n\nAdjacent stations (ro.wikipedia infobox): Lunca Siretului, Pașcani Triaj, Ruginoasa (toward Iași), Topile (toward Târgu Neamț).\n\nPașcani Triaj marshalling yard:\n- Station node \"Triaj Pascani\" (uic 5351346) is at 47.23834, 26.73565, about 2.2 km SSE.\n- Large yard fans of OSM service=yard tracks fill the area south-east of the passenger station toward it.\n- An OSM turntable (railway=turntable) is at 47.25237, 26.72930, about 600 m SE of the building, which indicates a locomotive depot area.",
+    "surroundings": "STREETS (OSM, high confidence):\n- Str. Garii (tertiary): runs NNW–SSE along the west side of the station, in front of the building. Address: Gara Pascani, Strada Garii, 705200 Pașcani (Nominatim). It continues north to about 47.2614, 26.7206 and south-east toward the yards.\n- Str. Ceferistilor (tertiary): comes from the WSW (about 47.2549, 26.7172) and reaches the station square at about 47.2567, 26.7233.\n- Other nearby streets: Str. 22 Decembrie (47.2555, 26.7234), Aleea Izvoarelor, Str. Mihai Eminescu, Str. Vasile Alecsandri, Str. Victoriei, and pedestrian Str. Cuza Voda / Esplanada (about 47.2532–47.2536, 26.7232–26.7236) leading south toward the centre.\n- The main through road is DN28A (Str. Moldovei / Str. Gradinitei / Str. Ștefan cel Mare). It passes about 1.0–1.5 km S/SW of the station, with DJ208 (Str. Dragoș Voda) to the west.\n- On the east side of the tracks: Str. 9 Mai and Str. Tamaduirii, plus Str. Unirii (DC125) at about 47.2627, 26.7294.\n\nSTATION SQUARE (OSM):\n- A parking area (OSM way 1557792410) lies directly west of the building, bbox lat 47.25636–47.25782, lon 26.72318–26.72414.\n- A bus station node (amenity=bus_station) is at 47.25668, 26.72384, in front of the south half of the building.\n- Police point at 47.25736, 26.72366 and doctors' office at 47.25713, 26.72399, both at the north end of the building.\n- CEC Bank at 47.25699, 26.72283.\n- Pizzeria/fast food at 47.25630, 26.72342.\n- Market hall (amenity=marketplace) at about 47.25657, 26.72169, on Str. Ceferistilor. Bzi.ro reports the Pașcani town hall's modernisation of the Str. Ceferistilor market (about 12–13 M EUR contract).\n\nWEST SIDE (between the station and the centre):\n- 5-storey socialist-era apartment blocks: G3, G4, G6, G7 at about 47.2553–47.2557, 26.7227–26.7239; B23, C17, C21; and others along Str. Mihai Eminescu / Aleea Izvoarelor.\n- A school at 47.25551, 26.72071.\n- Biserica Sfânta Vineri at 47.25572, 26.71858.\n\nEAST SIDE OF THE TRACKS:\n- Electroputere VFU Pașcani industrial site (former CFR workshops, OSM landuse=industrial, centroid 47.25690, 26.72778, bbox 47.2527–47.2613 / 26.7225–26.7324).\n- Large industrial halls at about 47.2559–47.2565, 26.7265–26.7288.\n- Further east is the Siret river floodplain.\n\nCITY CENTRE:\n- Primaria Municipiului Pașcani (town hall, Str. Mihail Kogalniceanu) is at 47.24512, 26.72408, about 1.3 km due south of the station.\n- Palatul Cantacuzino-Pașcanu is at 47.24519, 26.72785, about 1.35 km SSE.\n- Casa de Cultura Mihail Sadoveanu is at 47.24987, 26.71971.\n- Hotel Central (6 levels) is at 47.25013, 26.72061.\n- The centre sits on a terrace about 243 m a.s.l., while the station is at about 214 m. The city therefore rises about 29 m from the station toward the centre. Pedestrian stairs \"Scarile mari\" (47.25087, 26.72154) and \"Scarile mici\" (47.25025, 26.72267) climb this slope.\n\nRIVER SIRET:\n- Pașcani lies on the right (west) bank of the Siret. The river flows roughly N–S in a wide floodplain EAST of the town and of the railway.\n- An OSM river segment named Siret has its centroid at 47.24047, 26.76649 (about 3.7 km ESE of the station, about 208 m a.s.l.).\n- The nearest course is roughly 2.5–4 km east (medium confidence).\n- Unnamed streams/channels in OSM also run about 1.5 km west of the station.",
+    "traffic_facts": "- Major CFR junction in Moldavia. It is where line 500 (București – Suceava – Vicșani, TEN-T Core / Pan-European Corridor IX) meets line 606 to Iași (76 km) and the branch 517 to Târgu Neamț. Sources: ro/en Wikipedia, OSM. High confidence.\n- It is the transfer point between the Bucharest/Bacău – Suceava axis and Iași. ro.wikipedia calls it \"un important nod de cale ferata\"; en.wikipedia calls it \"a key node in the CFR rail network\".\n- Station on line 500 at km 386+191. It handles both passenger and freight traffic and is administered by CFR SA – Sucursala Regionala CF (SRCF) Iași (bzi.ro, 5 Jan 2024).\n- Pașcani Triaj marshalling yard is about 2.2 km SSE (OSM station node 47.23834, 26.73565, uic 5351346). Extensive electrified yard tracks run between it and the passenger station.\n- An OSM turntable at 47.25237, 26.72930 indicates a locomotive depot/maintenance area SE of the station.\n- Electroputere VFU Pașcani (the former CFR workshops, dating from 1876, about 1,000 workers in 1925) sits directly east of the tracks. It modernised 42 CFR Calatori coaches (about 67 M EUR, PNRR) in 2024–2026.\n- Services: regional trains Pașcani – Iași and Târgu Neamț – Pașcani – Iași. A Commons photo from 14 Apr 2023 shows train R5522, 10:10 Târgu Neamț – Iași, with a Class 41 DMU reversing at Pașcani. InterRegio services also call on line 500 (București – Suceava) and on Iași – Timișoara/Cluj routes. nachtzug.net lists 3 overnight connections (to București, Cluj-Napoca, Timișoara) as of an unverified date.\n- Exact trains per day and passenger counts: NOT FOUND in official sources. Check the CFR Calatori \"Mersul trenurilor\" timetable to get them. Do not invent a figure.\n- Town population is 30,766 (2021 census).",
+    "image_urls": [
+      "https://upload.wikimedia.org/wikipedia/commons/a/ae/Gara_Pascani.jpg | File:Gara Pascani.jpg | Public domain | Razvanus at ro.wikipedia | June 2009 | Platform-side view of the passenger building with portico, two-storey hipped-roof block and the footbridge in the distance, 944x686 | https://commons.wikimedia.org/wiki/File:Gara_Pascani.jpg",
+      "https://upload.wikimedia.org/wikipedia/commons/0/0a/14.04.23_Pa%C8%99cani_410836_%2852839982163%29.jpg | File:14.04.23 Pașcani 410836 (52839982163).jpg | CC BY-SA 2.0 | Phil Richards from London, UK | 2023-04-14 | Class 41 DMU 410836 on train R5522 Târgu Neamț–Iași reversing at Pașcani, 5543x3702 | https://commons.wikimedia.org/wiki/File:14.04.23_Pa%C8%99cani_410836_(52839982163).jpg",
+      "https://upload.wikimedia.org/wikipedia/commons/a/a2/14.04.23_Pa%C8%99cani_410768_%2852839946175%29.jpg | File:14.04.23 Pașcani 410768 (52839946175).jpg | CC BY-SA 2.0 | Phil Richards from London, UK | 2023-04-14 | DMU 410768 at Pașcani, 5908x3928 | https://commons.wikimedia.org/wiki/File:14.04.23_Pa%C8%99cani_410768_(52839946175).jpg",
+      "https://upload.wikimedia.org/wikipedia/commons/9/93/Electrica_878.jpg | File:Electrica 878.jpg | CC BY-SA 4.0 | TheTigerBeast871 | 2018-01-24 | Electric locomotive at Pașcani station (in Category:Pașcani train station), 5184x3384 | https://commons.wikimedia.org/wiki/File:Electrica_878.jpg",
+      "https://upload.wikimedia.org/wikipedia/commons/1/15/Russian_volunteers_at_the_railway_station%2C_Paschkanyi%2C_Moldavia%2C_on_their_way_to_the_Danube.jpg | Historical engraving of the 19th-century station | Public domain | The Illustrated London News | 1876-12-30 | 3742x2583",
+      "https://upload.wikimedia.org/wikipedia/commons/f/fb/Locomotora_2.jpg | File:Locomotora 2.jpg | CC BY-SA 4.0 | Feranza | 2021-09-19 | Old steam locomotive (filed in Category:Pașcani train station, but its description says Suceava, so verify before use)",
+      "Commons category: https://commons.wikimedia.org/wiki/Category:Pa%C8%99cani_train_station (6 files as of 2026-11-17)"
+    ],
+    "sources": [
+      "OpenStreetMap building way 841790852 'Gara Pascani' via https://api.openstreetmap.org/api/0.6/way/841790852/full.json (ODbL); geometry, size and orientation computed from this",
+      "OpenStreetMap station node 3120900494 'Pașcani' railway=station uic_ref 5351358; node 6508958248 'Triaj Pascani' uic 5351346; platforms 481440036/37/39; rail ways 481440027, 807803275 (ref 500), 940006947 (ref 606), 696406973 (ref 517); footbridge 848190254; turntable 841790853; bus_station node 12237436519; parking way 1557792410 (OSM API map bbox 26.716,47.250,26.734,47.264 and Overpass, 2026-11-17)",
+      "Nominatim: https://nominatim.openstreetmap.org/search?q=Gara+Pascani (47.2568852, 26.7240276, Strada Garii, 705200); town hall Primaria Municipiului Pascani 47.24512, 26.72408; Palatul Cantacuzino-Pascanu 47.24519, 26.72785; Electroputere VFU Pascani landuse 47.25690, 26.72778",
+      "Elevations: opentopodata EU-DEM 25m https://api.opentopodata.org/v1/eudem25m",
+      "https://ro.wikipedia.org/wiki/Gara_Pa%C8%99cani (stub: coordinates 47.25688N 26.72408E; lines 500, Pascani–Iasi, Pascani–Targu Neamt; neighbours Lunca Siretului, Pascani Triaj, Ruginoasa, Topile)",
+      "https://ro.wikipedia.org/wiki/Pa%C8%99cani (railway junction; CFR workshop monument 1876; 1000+ workers in 1925; Siret; population 30,766 in 2021)",
+      "https://en.wikipedia.org/wiki/Pa%C8%99cani (key CFR node, lines 500 and 600)",
+      "https://en.wikipedia.org/wiki/C%C4%83ile_Ferate_Rom%C3%A2ne_Line_600 (line 606 Iasi–Targu Frumos–Pascani, 76 km)",
+      "https://www.capital.ro/cfr-sa-va-moderniza-statiile-gara-de-nord-sinaia-busteni-videle-ploiesti-vest-si-pascani.html (6 Jul 2023: Pascani modernisation tender, 33.98 M lei, Programul Transporturi, scope, 25 months)",
+      "https://www.antena3.ro/actualitate/6-gari-romania-modernizate-statii-tren-investitie-sute-milioane-lei-679547.html (7 Jul 2023: platform 250 m x 6 m, canopies, pedestrian level crossing at X end, information system)",
+      "https://www.bzi.ro/modernizarea-statiei-cf-pascani-a-ramas-blocata-compania-nu-gaseste-o-firma-de-consultanta-pentru-a-demara-lucrarile-4887058 (5 Jan 2024: works tender annulled, consultancy tender relaunched a 3rd time; line 500 km 386+191; SRCF Iasi)",
+      "https://cfr.ro/wp-content/uploads/2025/04/finalizare-proiect-Pascani-Darmanesti.pdf (CFR press release, 31 Mar 2025: Pascani–Darmanesti 71 km feasibility study, SMIS 151660)",
+      "https://newsweek.ro/actualitate/cfr-vrea-sa-demoleze-o-gara-care-dateaza-din-1871-vor-sa-faca-o-alta-cladire-in-locul-monumentului (Lemberg–Czernowitz company station typology; Pascani among the junction stations)",
+      "https://iasi.travel/en/?p=13992 (Pascani–Iasi line completed May 1870)",
+      "https://www.romania-insider.com/society/cfr-calatori-trains-modernization-pnrr-june-2026 and https://www.revistabiz.ro/cum-arata-noile-vagoane-de-tren-modernizate-la-pascani-din-fonduri-pnrr/ (Electroputere VFU Pascani PNRR coach modernisation, not the station)",
+      "https://www.bzi.ro/piata-din-municipiul-pascani-va-fi-modernizata-a-fost-semnat-contractul-de-12-milioane-de-euro-cu-o-firma-din-vaslui-4138344 (market on Str. Ceferistilor near the station)",
+      "https://nachtzug.net/ro/oras/pascani/ (night-train links, unofficial)",
+      "Wikimedia Commons API: Category:Pașcani train station (image list and licences retrieved 2026-11-17)"
+    ]
+  },
+  "geo": {
+    "town_center_lat": 47.24808,
+    "town_center_lon": 26.72564,
+    "elevation_m": 230,
+    "terrain": "CONFIDENCE in brackets. [HIGH] Pascani lies at the southern edge of the Suceava Plateau (Podisul Sucevei), on the WEST/RIGHT bank of the Siret. Wikipedia RO gives 230 m in the lead and a 210-250 m range in the infobox. The Siret does NOT cross the town. It flows NNW to SSE about 2.5-3 km EAST of the station: 47.36500,26.66850 -> 47.29690,26.72810 -> 47.25440,26.76010 (level with the station) -> 47.20820,26.78920 (level with the A8) -> 47.15980,26.79220 (OSM way 16883181, sampled). The flood plain and meadow (lunca) between the railway and the Siret sit at 204-206 m (SRTM30). East of the river are Blagesti (47.24966,26.76431) and Harmanestii Noi, then gentle hills at about 245 m. SRTM30 elevation profile: station forecourt 212 m on the low terrace; the railway, Electroputere works and marshalling yard (Triaj, 47.23834,26.73565) all on the flat 210-220 m terrace; the old centre sits on a higher terrace step at 236-241 m (city hall 236, Cantacuzino palace 241). Pedestrian stairs 'Scarile mari' (47.25087,26.72154) and 'Scarile mici' climb this step, so the edge of the terrace is a visible scarp. West of town the ground rises steadily: 266 m at 26.690 (the A7 corridor), 344 m at 26.660 (Gastesti) and about 397 m at 47.26,26.64. These are the wooded hills of the plateau. The A7/A8 turbine interchange sits on a terrace slope at about 250-265 m (264 m at 47.2135,26.7050), so it is about 50 m above the station, 5 km to the SSW. That is an average grade of about 1%, with steeper sections of 2.5-3% near the end. Tributaries and streams [MEDIUM, OSM]: (1) Raul Zmeul rises west of Sodomeni and flows ESE just SOUTH of the interchange (47.20790,26.69890 -> 47.19900,26.72430 -> 47.18810,26.75340) to the Siret near Stolniceni-Prajescu. (2) A stream unnamed in OSM drains the western hills north-west of the station (47.25590,26.70020 -> 47.27860,26.71160 -> 47.29180,26.73120) and joins the Siret flood plain near Lunca; the DJ208 Dragos Voda bridge (47.25829,26.70460) crosses it. (3) Raul Iermolea flows further NW (47.27170,26.63990). (4) A small drainage/industrial canal runs beside the SE industrial zone (47.24390,26.73350 -> 47.24000,26.73900). (5) A small brook runs under DJ208 Stefan cel Mare at 47.23370,26.72561 (bridge). Railways [HIGH, OSM]: CFR line 500 (Suceava-Roman) runs N-S through the station and continues south on the flood-plain terrace via 47.24510,26.73140, Triaj, 47.22710,26.73920 and Stolniceni-Prajescu 47.20320,26.74120. Line 606 to Iasi branches east just south of the station, via 47.24850,26.75180 and 47.24030,26.76760, crossing the Siret at about 47.2410,26.7665. Line 517 to Targu Neamt branches WNW via 47.27090,26.70660. Motorways [HIGH, OSM data tagged under construction plus press reports]: the A7 Lot 3 (Mircesti-Pascani) runs NNW-SSE about 2-3 km WEST of the town (47.19787,26.72233 -> 47.21012,26.70992 -> 47.22251,26.69755 -> 47.23905,26.70160 -> 47.25358,26.69415 -> 47.26443,26.69068), between the town and the western hills. The A8 runs roughly W-E at latitude 47.20-47.215. It comes from Targu Neamt (47.19845,26.56639), passes the turbine, goes east over CFR line 500 at about 47.2121,26.7410 just north of Stolniceni-Prajescu, crosses the Siret flood plain at about 47.2055,26.7900 and continues towards Targu Frumos/Iasi (47.20822,26.84840). A second, ordinary A7 interchange with DN28A/DJ208 lies WEST of town near Gastesti/Bosteni, with ramp clusters around 47.2425,26.6840 and 47.2525-47.2614,26.6870-26.6940 [MEDIUM].",
+    "landmarks": [
+      {
+        "name": "Gara Pascani (CFR station building, uic 5351358)",
+        "lat": 47.25689,
+        "lon": 26.72403,
+        "note": "OSM/Nominatim building=train_station. The station node is at 47.25691,26.72454. The station is about 1 km NORTH of the old centre, on the 212 m terrace. Junction of CFR lines 500, 606 and 517. HIGH"
+      },
+      {
+        "name": "Autogara / bus station next to the station",
+        "lat": 47.25668,
+        "lon": 26.72384,
+        "note": "OSM amenity=bus_station node 12237436519 on the station forecourt (no name in OSM). Good spot for an intermodal hub. MEDIUM"
+      },
+      {
+        "name": "Palatul (Castelul) Cantacuzino-Pascanu",
+        "lat": 47.2452,
+        "lon": 26.72785,
+        "note": "OSM way 953643766, historic=building. Built 1650, rebuilt in the 18th century, listed monument of national importance (Wikipedia RO). Sits on the upper terrace at about 241 m, about 1.3 km SSE of the station. HIGH"
+      },
+      {
+        "name": "Primaria Municipiului Pascani (city hall)",
+        "lat": 47.24512,
+        "lon": 26.72405,
+        "note": "OSM way 664077978, amenity=townhall. HIGH"
+      },
+      {
+        "name": "Catedrala Pogorarea Sfantului Duh",
+        "lat": 47.24591,
+        "lon": 26.72448,
+        "note": "OSM way 1036212344, beside the city hall. Large Orthodox cathedral that dominates the centre. HIGH"
+      },
+      {
+        "name": "Biserica Adormirea Maicii Domnului (near the palace)",
+        "lat": 47.24497,
+        "lon": 26.72689,
+        "note": "OSM way 693548709. A second church of the same name is at 47.25123,26.72238. HIGH"
+      },
+      {
+        "name": "Biserica Inaltarea Domnului",
+        "lat": 47.24397,
+        "lon": 26.72127,
+        "note": "OSM way 665281104. MEDIUM"
+      },
+      {
+        "name": "Casa de Cultura Mihail Sadoveanu (Parc Hotel Central)",
+        "lat": 47.24983,
+        "lon": 26.7197,
+        "note": "Nominatim arts_centre. Opened 1960 (Wikipedia RO). HIGH"
+      },
+      {
+        "name": "Spitalul Municipal Pascani",
+        "lat": 47.24369,
+        "lon": 26.72556,
+        "note": "Nominatim, on Strada Stefan cel Mare. HIGH"
+      },
+      {
+        "name": "Scarile mari (monumental stairs, terrace scarp)",
+        "lat": 47.25087,
+        "lon": 26.72154,
+        "note": "OSM highway=steps. Marks the terrace step between the lower town and the upper centre. MEDIUM"
+      },
+      {
+        "name": "Electroputere VFU Pascani (railway works and industrial zone)",
+        "lat": 47.25703,
+        "lon": 26.72745,
+        "note": "OSM landuse=industrial, right beside the station on its east side. These are the historic railway workshops founded in 1876 (Wikipedia RO lists the workshops as a monument). HIGH"
+      },
+      {
+        "name": "South-east industrial zone and Triaj Pascani (marshalling yard)",
+        "lat": 47.23834,
+        "lon": 26.73565,
+        "note": "Industrial landuse polygons at 47.23945,26.73076, 47.24652,26.73297 and 47.24916,26.73795, plus 47.23316,26.71674 further SW. Flat land along CFR line 500, suitable for a light-rail right-of-way. MEDIUM"
+      },
+      {
+        "name": "North-west industrial zone",
+        "lat": 47.26698,
+        "lon": 26.70087,
+        "note": "OSM landuse=industrial, also at 47.27268,26.69442, along line 517 and DJ208. MEDIUM"
+      },
+      {
+        "name": "DN28A road bridge over the Siret (towards Targu Frumos/Iasi)",
+        "lat": 47.2436,
+        "lon": 26.76125,
+        "note": "OSM way 724248812, bridge=yes. DN28A runs east from the centre along Strada Gradinitei. At 47.24833,26.75155 a second DN28A bridge (OSM 425415878) crosses railway line 606, not the Siret. MEDIUM"
+      },
+      {
+        "name": "CFR line 606 railway bridge over the Siret",
+        "lat": 47.241,
+        "lon": 26.7665,
+        "note": "Position inferred from where the line 606 geometry meets the Siret geometry in OSM. MEDIUM-LOW"
+      },
+      {
+        "name": "DN28A bridge over CFR line 500 (Strada Gradinitei)",
+        "lat": 47.24479,
+        "lon": 26.7313,
+        "note": "OSM way 28912198, layer 1. Grade-separated crossing at the south-east of the centre. A light rail could pass under or beside it. HIGH"
+      },
+      {
+        "name": "A7 x A8 turbine interchange (nodul turbion Pascani-Sodomeni)",
+        "lat": 47.214,
+        "lon": 26.7055,
+        "note": "Point where the A7 and A8 centrelines cross, computed from OSM construction ways (A7 47.21012,26.70992 -> 47.22251,26.69755; A8 47.21372,26.70504 -> 47.21448,26.70976). The ramp cluster covers about 47.2070-47.2200 x 26.6930-26.7170. Press: first turbine interchange in Romania, at A7 km 71+374, 220 ha, 8 ramps for 80 km/h, 12 bridges/underpasses (8 on A7, 4 on A8), 5 culverts. It straddles Pascani and Stolniceni-Prajescu, about 5.0 km in a straight line SSW of the station and about 6-7 km by road. Part of A7 Lot 3 Mircesti-Pascani (28.09 km). Lot 3 was officially due in December 2026, and the press reports it as still under construction in 2026. Position MEDIUM-HIGH, facts HIGH"
+      },
+      {
+        "name": "Sodomeni (village of Pascani municipality)",
+        "lat": 47.22233,
+        "lon": 26.68448,
+        "note": "Gives the interchange its name. OSM place node. HIGH"
+      },
+      {
+        "name": "Stolniceni-Prajescu (commune seat)",
+        "lat": 47.20389,
+        "lon": 26.73951,
+        "note": "South of the interchange. CFR line 500 has a stop here, and the A8 crosses line 500 about 1 km to the north. HIGH"
+      },
+      {
+        "name": "A7 x DN28A/DJ208 interchange (Pascani west)",
+        "lat": 47.2425,
+        "lon": 26.684,
+        "note": "Cluster of motorway_link ways (under construction) west of town near Gastesti/Bosteni. Approximate. MEDIUM-LOW"
+      },
+      {
+        "name": "Old town centre (Wikipedia coordinate)",
+        "lat": 47.24944,
+        "lon": 26.72722,
+        "note": "Wikipedia RO infobox gives 47 deg 14'58\"N 26 deg 43'38\"E. The OSM place=city node is at 47.24808,26.72564. HIGH"
+      }
+    ],
+    "airports": [
+      {
+        "code": "IAS",
+        "name": "Aeroportul International Iasi (LRIA)",
+        "lat": 47.17889,
+        "lon": 27.62,
+        "road_km_from_pascani": 80.7,
+        "via": "OSRM route from Pascani station, Nov 2026: Str. Garii -> DN28A east over the Siret to Targu Frumos (24 km) -> DN28 to Iasi (36 km) -> city streets -> DJ282I to the airport, about 97 min. Straight line 68.2 km. In future, the A8 from the turbine east via Targu Frumos to Iasi. Coordinates from Wikipedia EN, elevation 125 m. HIGH"
+      },
+      {
+        "code": "SCV",
+        "name": "Aeroportul International Stefan cel Mare Suceava (LRSV), Salcea",
+        "lat": 47.6875,
+        "lon": 26.35417,
+        "road_km_from_pascani": 62.4,
+        "via": "OSRM route: north on DJ208 / DJ208S / DJ208A towards Dolhasca/Liteni, then DJ290 to Salcea, about 80 min. The alternative via DN2/E85 (Motca-Falticeni-Suceava) is about 70 km. Straight line 55.4 km. In future, the A7 north (Pascani-Suceava section, still at planning stage). Coordinates from Wikipedia EN. Another source gives 47.68405,26.34992 (about 0.4 km away). HIGH"
+      },
+      {
+        "code": "BCM",
+        "name": "Aeroportul International George Enescu Bacau (LRBC)",
+        "lat": 46.52194,
+        "lon": 26.91028,
+        "road_km_from_pascani": 90.7,
+        "via": "OSRM route on the current network: DJ208 west to DN2/E85 at Motca, then DN2 south via Roman to Bacau, about 110 min. Straight line 82.9 km. Once the A7 Bacau-Pascani opens (Lot 3 targeted for end 2026), the route is the turbine interchange -> A7 south. Coordinates from Wikipedia EN, elevation 185 m. HIGH"
+      }
+    ],
+    "light_rail_corridor_suggestion": "RECOMMENDED corridor A, about 5.5-6 km, keeps clear of the dense old centre on the upper terrace. Stops: (0) Gara Pascani intermodal hub on the station forecourt (47.25690,26.72430, 212 m), next to the bus station (47.25668,26.72384). (1) South inside or beside the CFR line 500 right-of-way, along its west/east edge past the Electroputere VFU works (47.25703,26.72745) and 47.25200,26.72900. This land is flat at about 212 m with railway and industrial use, so no houses need to be demolished. (2) Under or beside the DN28A Strada Gradinitei overpass (47.24479,26.73130). A stop here, about 400 m from the hospital and the Cantacuzino palace, serves the centre. (3) South past the industrial zone to the Triaj/marshalling yard edge (47.23834,26.73565). (4) Curve SW across the industrial land (47.23945,26.73076 / 47.23316,26.71674) and join DJ208 Strada Stefan cel Mare near its small stream bridge (47.23370,26.72561). (5) South on DJ208 to the Strada Crizantemelor / DJ208L fork (47.22920,26.72850). (6) Follow DJ208L SW (47.22520,26.72290 -> 47.21900,26.71650). This road runs right through the turbine footprint (DJ208L continues to 47.19820,26.69500) and climbs from about 219 m to about 250-264 m, a 2.5-3% grade, which is fine for light rail. (7) Terminal 'Turbion Park & Ride / Mobility Hub' outside the ramp loops, on the NE side of the interchange, at about 47.21600-47.21900, 26.71200-26.71650 (approximate; the exact land between ramps should be checked on satellite imagery). Connections there: coaches and shuttles onto the A7 (towards Bacau BCM and, later, north towards Suceava SCV) and the A8 (east towards Iasi IAS, west towards Targu Neamt). This corridor crosses no major river; it needs only small culverts/bridges at the brook by DJ208 (47.2337,26.7256). ALTERNATIVE B, about 7.6 km and flatter: stay beside CFR line 500 all the way south via 47.22710,26.73920 to the point where the A8 crosses line 500 (about 47.21210,26.74100, north of Stolniceni-Prajescu), then run west about 2.7 km in or beside the A8 right-of-way (47.21500,26.72000 -> 47.21450,26.70900) to the turbine. This uses only transport land, but it is longer and climbs about 50 m in its last 3 km. Both options stay WEST of the Siret, which lies about 2.5-4 km to the east, so neither needs a crossing of that river. The Siret flood plain (204-206 m) should be kept as a green buffer and could hold the PV/solar fields. Straight-line distance from the station to the turbine centre (47.21400,26.70550) is 5.0 km.",
+    "population_facts": "Pascani municipality (Iasi County, NW part of the county): 30,766 inhabitants at the 2021 census, 33,745 at the 2011 census (Wikipedia RO). The OSM place node still carries the 1992 census figure, 35,897. Area 75.32 sq km. Component localities: Pascani (seat), Blagesti, Bosteni, Gastesti, Lunca and Sodomeni. Status: urban commune from 1931, raion seat 1950-1968, municipality since 1995. First documentary mention 1419, in a charter of Alexandru cel Bun. Pascani is an important CFR railway junction: line 500 Suceava-Roman, the main line to Iasi (606) and the secondary line to Targu Neamt (517). The railway workshops date from 1876. Postal code 705200, SIRUTA 95408.",
+    "sources": [
+      "https://ro.wikipedia.org/wiki/Pașcani (coordinates 47.24944,26.72722; elevation 230 m, range 210-250 m; 2021 census 30,766; 2011 census 33,745; area 75.32 sq km; villages; monuments)",
+      "OpenStreetMap via the Overpass API (overpass-api.de), queried 2026-11-17: A7/A8 ways under construction and motorway_link ramps, Siret waterway 16883181, Zmeul/Iermolea streams, CFR lines 500/606/517, DN28A/DJ208/DJ208L roads and bridges, townhall/palace/churches/industrial landuse, bus_station node",
+      "https://nominatim.openstreetmap.org (Gara Pascani 47.25689,26.72403; Casa de Cultura; Spitalul Municipal)",
+      "https://api.opentopodata.org/v1/srtm30m (SRTM 30 m elevations for the station, centre, Siret, interchange and western hills)",
+      "https://router.project-osrm.org (driving distances and roads from Pascani station to IAS, SCV and BCM, Nov 2026 network)",
+      "https://en.wikipedia.org/wiki/Iași_International_Airport (47.17889,27.62000)",
+      "https://en.wikipedia.org/wiki/George_Enescu_International_Airport (46.52194,26.91028)",
+      "https://en.wikipedia.org/wiki/Suceava_Ștefan_cel_Mare_International_Airport (47.68750,26.35417; Salcea, 12 km E of Suceava)",
+      "https://economedia.ro/video-autostrada-a7-bacau-pascani-imagini-noi-din-zona-nodului-turbion-de-la-pascani-sodomeni-de-la-intersectia-autostrazilor-a7-a8.html (turbine Pascani-Sodomeni: 220 ha, 8 ramps, 12 bridges/underpasses, 5 culverts; Lot 3 Mircesti-Pascani 28.09 km)",
+      "https://www.bzi.ro/imagini-noi-de-pe-autostrada-a7-bacau-pascani-avanseaza-lucrarile-la-lotul-care-va-include-primul-nod-turbion-din-romania-5569661",
+      "https://profit.ro/povesti-cu-profit/auto-transporturi/foto-autostrada-bacau-pascani-prinde-contur-firmele-lui-umbrarescu-vor-construi-primul-nod-rutier-turbion-din-romania-21297327 (fetch returned 403; only the search snippet was used: km 71+374, Pascani and Stolniceni-Prajescu, about 7 km from Pascani)",
+      "https://newsweek.ro/economie/video-a-inceput-asfaltarea-celui-mai-mare-turbion-de-autostrada-din-romania-are-3-etaje-8-bretele-12-pasaje (3 levels, 8 ramps, 12 underpasses)",
+      "https://economedia.ro/autostrada-moldovei-a7-traficul-pe-lotul-2-domnesti-targ-racaciuni-va-fi-deschis-integral-in-luna-mai-2026-cand-vor-fi-deschise-circulatiei-loturile-pana-la-pascani.html and search snippets from capital.ro / economica.net (Lot 3 targeted December 2026)"
+    ]
+  },
+  "node": {
+    "node_name": "Nodul rutier turbion Pascani (A7 x A8), also reported as \"nodul turbion Pascani-Sodomeni\"; first turbine-type motorway interchange in Romania. Part of A7 Bacau-Pascani Lot 3 Mircesti-Pascani.",
+    "node_lat": 47.21388,
+    "node_lon": 26.70568,
+    "node_type": "Turbine (\"turbion\") interchange, fully directional, with high-speed ramps for every movement. Facts from DRDP Iasi/CNAIR via news reports (economedia 2025-05, antena3 and newsweek 2026-07-13/14). High confidence: 8 ramps (bretele) with a design speed of 80 km/h and radii of 400-600 m; 12 overpasses/pasaje (8 on the A7, 4 on the A8); 5 culverts (podete). The node covers about 220 ha and is roughly 2 km long. Newsweek's headline says it has 3 levels (etaje); medium confidence, since other articles do not state a level count. OSM data (Overpass, 2026-11-17): 32 motorway_link ways (highway=construction, construction=motorway_link, opening_date=2026). Many are bridge=yes with layer=1, and the mainlines carry bridge segments at layer 1. The ramp footprint bbox is lat 47.20591-47.22180, lon 26.69051-26.72323, with ramp centroid 47.21363,26.70596. The node coordinate is the computed crossing of the A7 and A8 mainline centrelines in OSM (4 carriageway crossings within about 15 m of 47.21388,26.70568). The OSM status tag for Lot 3 gives builder UMB, PNRR financing, and physical progress of 55.70% on 30.08.2026 (54.6% on 31.07.2026, 41% on 31.12.2025).",
+    "location_description": "South-west of Pascani, Iasi County, inside Pascani municipality next to the village of Sodomeni, between the Pascani and Stolniceni-Prajescu administrative areas. Distances and directions are computed from OSM place nodes. Sodomeni is 1.9 km WNW of the node (47.22233,26.68448), Bosteni 2.6 km NW (47.23199,26.68435), Stolniceni-Prajescu 2.8 km ESE (47.20389,26.73951), Bratesti 3.1 km S (47.18644,26.70406), and the Pascani town centre 4.1 km NNE (47.24808,26.72564). Pascani station (OSM node 3120900494) is at 47.25691,26.72454, which confirms the approximate 47.25N 26.73E. The node is 4.99 km from the station, on a bearing of 197 deg (SSW) from the station. Triaj Pascani station (47.23834,26.73565) is 3.5 km NE of the node, on the rail line south of the main station, and could serve as an intermediate stop for a light-rail line. The nearest A7 point to the station is 47.24830,26.70159, about 2.0 km WSW, because the A7 bypasses Pascani on the west side. The Siret river runs east of the town (nearest point about 47.23970,26.75281, 4.6 km E of the node); the node is on the west terrace and the A8 crosses the Siret east of the node, around lon 26.75-26.77. DN28A (Strada Moldovei / Strada Gradinitei through Pascani) passes 3.4 km N of the node. The E85/DN2 corridor runs further west, through the Motca area. The A7 also has a separate local interchange, Nod Pascani, west of the town at about 47.2553,26.6905 (ramps between 47.2533 and 47.2632); there A7 Lot 3 ends and A7 Pascani-Suceava Lot 1 begins. Medium-high confidence on this layout, based on OSM geometry.",
+    "a7_route_near_pascani": "A7 Autostrada Moldovei. Bacau-Pascani section, 77 km, Lot 3 Mircesti-Pascani: 28.09 km, contract signed 15.02.2023, consortium UMB / SA&PE Construct / Tehnostrade, 1.766 bn lei excluding VAT, PNRR funds. Status: under construction. Asphalting at the turbine started July 2026; OSM progress is 55.7% on 30.08.2026. The official target is opening by end of 2026; Economedia estimates December 2026. Confidence medium, since no opening is confirmed as of 2026-11-17. Route in OSM (construction=motorway, ref=A7, name \"Lot 3\"): it comes from the south-east at about 47.04884,26.85005, near Mircesti and the Siret, and runs NNW through 47.12278,26.77334, 47.16126,26.74047, 47.18758,26.72710 and 47.20041,26.72005. It crosses the A8 at the turbine (47.21388,26.70568), then continues north along the west side of Pascani through 47.22334,26.69717, 47.23648,26.70256, 47.24988,26.70004 and the Pascani interchange (about 47.2553,26.6905), and ends at about 47.26325,26.68984. North of that, OSM has A7 \"Lot 1\" Pascani-Suceava (construction, no opening date) through 47.27361,26.69879, 47.28743,26.69708, 47.31060,26.67427, 47.33289,26.64947, 47.35877,26.64714, 47.38296,26.66074 and 47.40018,26.62958, heading towards Roscani. Pascani-Suceava Lot 1 runs from Nod Pascani to Nod Roscani, about 33 km, estimated at 4.3 bn lei; contracts were reported signed with UMB in May 2026, with 6 months of design and 24 months of construction. That lot is in its design or early-works phase.",
+    "a8_route_near_pascani": "A8 Autostrada Unirii, Targu Neamt-Iasi-Ungheni (Section IV, 88.77 km). Lots: Lot 1 Motca (Targu Neamt)-Targu Frumos, about 27 km, with 36 bridges and overpasses (8.5 km), 4 tunnels (1.7 km) and 3 interchanges (Motca, Pascani, Targu Frumos). Its contract was signed in May 2026 with a consortium led by SA&PE Construct (with Tehnostrade, Spedition UMB, Euro-Asfalt), SAFE funding, 4.87 bn lei, 10 months of design plus 36 months of construction. A priority 5.5 km segment links the A8 to the A7; CNIR says it could be ready in about 12 months, which puts it around 2027 (wall-street.ro, 2026-10-09). Lot 2 Targu Frumos-Letcani (28.6 km) was awarded to Danlin XXL in April 2026. Lot 3 Letcani-Iasi (17.7 km) and Lot 4 Iasi-Pod Ungheni (15.5 km) are in the tender or award phase. West of the node, Section III Leghin-Targu Neamt/Motca (29.91 km, UMB, signed September 2023) is under construction. Status near Pascani: only the A8 stubs inside the turbine are being built now, under the A7 Lot 3 contract (OSM opening_date 2026 between lon 26.6779 and 26.7329). The rest is tagged construction in OSM with no date, so the A8 will not be usable before about 2027-2030. Route in OSM (ref=A8, name \"Autostrada Unirii\"): from the west at about 47.17401,26.44813 (towards Targu Neamt) it runs east through 47.19459,26.52459, 47.19931,26.54348, 47.19752,26.60770 (Motca node area, ramps around 47.197,26.61) and the Boureni tunnel (47.20459,26.63429 to 47.20558,26.63903). It continues through 47.20434,26.64734, 47.19960,26.66593 (a cut or tunnel section at layer -1, 26.659-26.668), 47.20353,26.67792 and 47.20930,26.69051, then enters the turbine and crosses the A7 at 47.21388,26.70568. East of the node it passes 47.21457,26.70974, 47.21435,26.73001, 47.20991,26.75071 (towards the Siret crossing / Stolniceni-Prajescu), 47.20356,26.79264, 47.20576,26.83326, 47.21270,26.87413, 47.21784,26.92177, 47.22168,26.96678 and 47.23040,27.00368, continuing east towards Targu Frumos. The A8 runs almost east-west at lat 47.20-47.22. Geometry confidence is medium: OSM alignments of design-stage lots may be approximate.",
+    "polyline_points": [
+      {
+        "name": "Gara Pascani (OSM station node 3120900494)",
+        "lat": 47.25691,
+        "lon": 26.72454
+      },
+      {
+        "name": "Triaj Pascani station",
+        "lat": 47.23834,
+        "lon": 26.73565
+      },
+      {
+        "name": "Nod turbion A7xA8 (mainline crossing)",
+        "lat": 47.21388,
+        "lon": 26.70568
+      },
+      {
+        "name": "Turbine ramp bbox NW corner",
+        "lat": 47.2218,
+        "lon": 26.69051
+      },
+      {
+        "name": "Turbine ramp bbox SE corner",
+        "lat": 47.20591,
+        "lon": 26.72323
+      },
+      {
+        "name": "A7 north - Lot1 Pascani-Suceava towards Roscani",
+        "lat": 47.40018,
+        "lon": 26.62958
+      },
+      {
+        "name": "A7 Lot1",
+        "lat": 47.38296,
+        "lon": 26.66074
+      },
+      {
+        "name": "A7 Lot1",
+        "lat": 47.35877,
+        "lon": 26.64714
+      },
+      {
+        "name": "A7 Lot1",
+        "lat": 47.33289,
+        "lon": 26.64947
+      },
+      {
+        "name": "A7 Lot1",
+        "lat": 47.3106,
+        "lon": 26.67427
+      },
+      {
+        "name": "A7 Lot1",
+        "lat": 47.28743,
+        "lon": 26.69708
+      },
+      {
+        "name": "A7 Lot1",
+        "lat": 47.27361,
+        "lon": 26.69879
+      },
+      {
+        "name": "A7 end Lot3 / start Lot1",
+        "lat": 47.26325,
+        "lon": 26.68984
+      },
+      {
+        "name": "A7 Nod Pascani (local interchange, west of town)",
+        "lat": 47.2553,
+        "lon": 26.6905
+      },
+      {
+        "name": "A7 west of Pascani (nearest to station)",
+        "lat": 47.2483,
+        "lon": 26.70159
+      },
+      {
+        "name": "A7",
+        "lat": 47.23648,
+        "lon": 26.70256
+      },
+      {
+        "name": "A7 near Sodomeni",
+        "lat": 47.22334,
+        "lon": 26.69717
+      },
+      {
+        "name": "A7 in turbine",
+        "lat": 47.21189,
+        "lon": 26.70788
+      },
+      {
+        "name": "A7 south of turbine",
+        "lat": 47.20041,
+        "lon": 26.72005
+      },
+      {
+        "name": "A7 Lot3",
+        "lat": 47.18758,
+        "lon": 26.7271
+      },
+      {
+        "name": "A7 Lot3",
+        "lat": 47.17409,
+        "lon": 26.73047
+      },
+      {
+        "name": "A7 Lot3",
+        "lat": 47.16126,
+        "lon": 26.74047
+      },
+      {
+        "name": "A7 Lot3",
+        "lat": 47.14713,
+        "lon": 26.75426
+      },
+      {
+        "name": "A7 Lot3",
+        "lat": 47.12278,
+        "lon": 26.77334
+      },
+      {
+        "name": "A7 Lot3",
+        "lat": 47.0945,
+        "lon": 26.79094
+      },
+      {
+        "name": "A7 Lot3",
+        "lat": 47.07013,
+        "lon": 26.81257
+      },
+      {
+        "name": "A7 Lot3 south end of bbox (towards Mircesti/Bacau)",
+        "lat": 47.04884,
+        "lon": 26.85005
+      },
+      {
+        "name": "A8 west (towards Targu Neamt)",
+        "lat": 47.17401,
+        "lon": 26.44813
+      },
+      {
+        "name": "A8",
+        "lat": 47.19459,
+        "lon": 26.52459
+      },
+      {
+        "name": "A8",
+        "lat": 47.19918,
+        "lon": 26.56542
+      },
+      {
+        "name": "A8 near Motca node",
+        "lat": 47.19752,
+        "lon": 26.6077
+      },
+      {
+        "name": "A8 Tunel Boureni west portal",
+        "lat": 47.20459,
+        "lon": 26.63429
+      },
+      {
+        "name": "A8 Tunel Boureni east portal",
+        "lat": 47.20558,
+        "lon": 26.63903
+      },
+      {
+        "name": "A8",
+        "lat": 47.20434,
+        "lon": 26.64734
+      },
+      {
+        "name": "A8 (cut/tunnel layer -1)",
+        "lat": 47.1996,
+        "lon": 26.66593
+      },
+      {
+        "name": "A8",
+        "lat": 47.20353,
+        "lon": 26.67792
+      },
+      {
+        "name": "A8 entering turbine (west)",
+        "lat": 47.2093,
+        "lon": 26.69051
+      },
+      {
+        "name": "A8 in turbine (east of crossing)",
+        "lat": 47.21457,
+        "lon": 26.70974
+      },
+      {
+        "name": "A8 east of turbine",
+        "lat": 47.21435,
+        "lon": 26.73001
+      },
+      {
+        "name": "A8 towards Siret crossing / Stolniceni-Prajescu",
+        "lat": 47.20991,
+        "lon": 26.75071
+      },
+      {
+        "name": "A8",
+        "lat": 47.20563,
+        "lon": 26.7706
+      },
+      {
+        "name": "A8",
+        "lat": 47.20356,
+        "lon": 26.79264
+      },
+      {
+        "name": "A8",
+        "lat": 47.20576,
+        "lon": 26.83326
+      },
+      {
+        "name": "A8",
+        "lat": 47.2127,
+        "lon": 26.87413
+      },
+      {
+        "name": "A8",
+        "lat": 47.21784,
+        "lon": 26.92177
+      },
+      {
+        "name": "A8",
+        "lat": 47.22168,
+        "lon": 26.96678
+      },
+      {
+        "name": "A8 east (towards Targu Frumos/Iasi)",
+        "lat": 47.2304,
+        "lon": 27.00368
+      },
+      {
+        "name": "Siret river (nearest point east of node)",
+        "lat": 47.2397,
+        "lon": 26.75281
+      },
+      {
+        "name": "Sodomeni village",
+        "lat": 47.22233,
+        "lon": 26.68448
+      },
+      {
+        "name": "Bosteni village",
+        "lat": 47.23199,
+        "lon": 26.68435
+      },
+      {
+        "name": "Stolniceni-Prajescu village",
+        "lat": 47.20389,
+        "lon": 26.73951
+      },
+      {
+        "name": "Pascani town centre (place node)",
+        "lat": 47.24808,
+        "lon": 26.72564
+      }
+    ],
+    "plan_images_urls": [
+      "https://newsweek.ro/resize/3GOy-GfF4L46CgptD6iF03Hrf5zcfms9B1t_YHBRn7o/rs:fill:1200:900:1/g:ce/aHR0cHM6Ly9uZXdzd2Vlay5yby9zdG9yYWdlL211bHRpbWVkaWEvMjAyNC8wMS92ckVXV3lteE1OdVBoOEMwcmxDYkxxbXF0ZGN4Qjd3TldvRTJGdUJXLmpwZw.webp",
+      "https://newsweek.ro/resize/nDFPX_6DcSjiC4TvRFldqVcg99s9mbtDoHN2W7ktzkI/rs:fill:1200:900:1/g:ce/aHR0cHM6Ly9uZXdzd2Vlay5yby9zdG9yYWdlL211bHRpbWVkaWEvMjAyNi8wNy9RTm9wRTdzNFlVY0kyOUVKNUNtMXAxOTB3NEgxbWowYUE1Y2VQUjNrLmpwZw.webp",
+      "https://www.antena3.ro/thumbs/amp/2026/07/13/a-inceput-asfaltarea-la-cel-mai-mare-nod-rutier-din-romania-pe-a7-intre-mircesti-si-pascani-va-lega-marile-coridoare-europene-1084492.webp",
+      "https://www.antena3.ro/thumbs/big4/2026/07/13/a-inceput-asfaltarea-la-cel-mai-mare-nod-rutier-din-romania-pe-a7-intre-mircesti-si-pascani-va-lega-marile-coridoare-europene-1084491.jpg",
+      "https://media.economedia.ro/cgxJxYUKEtiQkzhc7KmRFj3RRKY=/1320x743/smart/filters:format(jpeg)/https%3A%2F%2Fwww.economedia.ro%2Fwp-content%2Fuploads%2F2025%2F05%2Fsantierul-Autostrazii-A7-Bacau-%E2%80%93-Pascani-Lot-3-Mircesti-Pascani-1024x579.jpg"
+    ],
+    "sources": [
+      "OpenStreetMap via Overpass API (overpass-api.de), query 2026-11-17 (osm_base 2026-11-17T11:06Z): A7 ways e.g. 1064150849, 1064086550, 1064150838, 1302701111; A8 ways 1064159189-1064159215, 1358182124/5 (Tunel Boureni); turbine ramps 1064159157-1064159188; Pascani station node 3120900494; place nodes Sodomeni 372681134, Stolniceni-Prajescu 317291617. Data ODbL.",
+      "https://economedia.ro/video-autostrada-a7-bacau-pascani-imagini-noi-din-zona-nodului-turbion-de-la-pascani-sodomeni-de-la-intersectia-autostrazilor-a7-a8.html (220 ha, 2 km, 8 ramps, 12 pasaje, 5 podete, Lot 3 contract details)",
+      "https://newsweek.ro/economie/video-a-inceput-asfaltarea-celui-mai-mare-turbion-de-autostrada-din-romania-are-3-etaje-8-bretele-12-pasaje (3 etaje, 8 ramps at 80 km/h, 12 pasaje 8 A7 + 4 A8, 2026-07-14)",
+      "https://www.antena3.ro/actualitate/a-inceput-asfaltarea-la-cel-mai-mare-nod-rutier-din-romania-pe-a7-intre-mircesti-si-pascani-va-lega-marile-coridoare-europene-795485.html (asphalting started 13.07.2026)",
+      "https://newsweek.ro/economie/video-unde-se-construieste-prima-intersectie-de-autostrazi-de-tip-turbion-din-romania (Pascani-Sodomeni, ramp radii 400-600 m)",
+      "https://profit.ro/povesti-cu-profit/auto-transporturi/foto-autostrada-bacau-pascani-prinde-contur-firmele-lui-umbrarescu-vor-construi-primul-nod-rutier-turbion-din-romania-21297327",
+      "https://www.bzi.ro/imagini-noi-de-pe-autostrada-a7-bacau-pascani-avanseaza-lucrarile-la-lotul-care-va-include-primul-nod-turbion-din-romania-5569661",
+      "https://www.wall-street.ro/articol/transporturi-and-infrastructura/legatura-dintre-autostrada-unirii-autostrada-moldovei-ar-putea-fi-gata-in-2027 (A8 Motca-Targu Frumos, 5.5 km A7 link, 2027)",
+      "https://economedia.ro/danlin-xxl-castiga-un-nou-contract-pe-autostrada-unirii-a8.html (A8 Section IV lots)",
+      "https://www.capital.ro/primul-contract-finantat-prin-programul-safe-pentru-a8-a-fost-semnat-de-catre-cnair-se-construiesc-tunele-poduri-si-noduri-rutiere-pe-tronsonul-targu-neamt-targu-frumos.html",
+      "https://ted.europa.eu/en/notice/313170-2026/pdf (A7 Pascani-Suceava Lot 1: Nod Pascani to Nod Roscani, about 33 km)",
+      "https://www.economica.net/?p=937359 (A7 Pascani-Suceava contracts signed with UMB)",
+      "https://adevarul.ro/stiri-interne/evenimente/primii-kilometri-ai-lotului-3-din-a7-intra-la-2535101.html (Lot 3 opening target end of 2026)"
+    ]
+  },
+  "verify": "{\n\"verification_date\":\"2026-11-17\",\n\"methods\":\"OSM Nominatim search and lookup (live); OSM API 0.6 map.json bbox downloads, used because every Overpass mirror (overpass-api.de, kumi, private.coffee, mail.ru) returned 502/504/406 at capacity. Line-segment intersections were computed locally from the downloaded OSM geometry. Cross-sources: OurAirports airports.csv, EU-DEM 25 m (opentopodata), and press (profit.ro, digi24, economedia, newsweek via web search). Distances use an equirectangular approximation, accurate to about 0.5%.\",\n\n\"station\":{\n \"station_building_lat\":47.25689,\"station_building_lon\":26.72403,\n \"station_node_lat\":47.25691,\"station_node_lon\":26.72454,\n \"building_bbox\":\"lat 47.25639-47.25743, lon 26.72360-26.72442\",\n \"building_long_axis_bearing_deg\":158.4,\n \"building_length_m\":116.6,\n \"ground_elev_m\":213.6,\n \"status\":\"CONFIRMED. Nominatim search 'Gara Pascani' returns OSM way 841790852 building=train_station at 47.2568852,26.7240276, Strada Garii, 705200. Nominatim lookup returns node 3120900494 railway=station 'Pașcani' at 47.2569078,26.7245378. Triaj Pascani is node 6508958248 at 47.23834,26.73565 (Strada Corbului). The building's longest edge, computed from OSM, runs at bearing 158.4 deg and is 116.6 m long, against a claim of 158.3 deg and about 116 m. EU-DEM gives 213.6 m. Second source: ro.wikipedia gives 47.25688N 26.72408E, within 5 m.\",\n \"confidence\":\"HIGH\"\n},\n\n\"node_A7xA8\":{\n \"node_lat\":47.21388,\"node_lon\":26.70566,\n \"node_type\":\"Turbine ('turbion') fully directional motorway-to-motorway interchange. It has 8 directional ramps (80 km/h, radii 400-600 m), 12 overpasses (8 on the A7, 4 on the A8) and 5 culverts, covers about 220 ha and is about 2 km long. Press places it at A7 km 71+374 on land in Pascani (Sodomeni) and Stolniceni-Prajescu, about 7 km from Pascani by road.\",\n \"osm_detail\":\"OSM gives 4 carriageway crossings: A7 ways 1064086550/1064150849 against A8 ways 1064159197/1064159200, at 47.21386,26.70579; 47.21394,26.70570; 47.21383,26.70563; 47.21391,26.70554. Their mean is 47.21388,26.70566. At the crossing the A8 is the upper road (bridge=yes, layer=1) over the A7. There are 32 construction=motorway_link ways with bbox lat 47.20591-47.22180, lon 26.69051-26.72323 and centroid 47.21363,26.70596, all exactly as claimed. Mainline ways carry opening_date=2026 and name 'A7 Lot 3' / 'A8 Autostrada Unirii'. DJ208L (OSM 844974080, 47.22523,26.72292 -> 47.19821,26.69501) passes through the interchange footprint with no shared nodes, so it is grade-separated. DC127 Str. 13 Decembrie runs along the west side.\",\n \"ground_elev_m\":266.1,\n \"distance_from_station_building_km\":4.99,\"bearing_from_station_deg\":197,\n \"alternatives\":\"None needed. The location is unambiguous across OSM geometry, the economedia/newsweek name 'Pascani-Sodomeni' and the profit.ro location (Pascani + Stolniceni-Prajescu). The earlier claim of 26.70568 differs by 2 m, which is negligible. The GEO landmark value of 47.214,26.7055 is a rounded version and acceptable.\",\n \"level_count\":\"'3 etaje' comes only from a newsweek headline. A typical turbine has 2-3 levels, and OSM shows only layer 0/1 at the centre. Treat it as MEDIUM-LOW confidence and model 3 levels as an artistic choice.\",\n \"confidence\":\"Position HIGH; ramp, overpass and area facts HIGH (consistent across digi24, gandul, economedia, newsweek, profit); km 71+374 MEDIUM (one source); status (under construction, asphalting from July 2026, Lot 3 targeted end of 2026) MEDIUM\"\n},\n\n\"airports\":[\n {\"code\":\"IAS\",\"icao\":\"LRIA\",\"lat\":47.17889,\"lon\":27.62000,\"elev_m\":125,\"check\":\"OurAirports 47.17963,27.62143 (about 130 m away). OSM relation 18791271 centroid 47.17990,27.62038 (about 115 m). Straight-line distance from the station is 68.2 km, confirmed.\",\"confidence\":\"HIGH\"},\n {\"code\":\"SCV\",\"icao\":\"LRSV\",\"lat\":47.68750,\"lon\":26.35417,\"elev_m\":419,\"check\":\"OurAirports 47.68750,26.35410 (identical). OSM way 84575549 centroid 47.68806,26.35250 (about 140 m). Straight-line distance 55.4 km, confirmed. The alternative 47.68405,26.34992 is about 0.5 km off; do not use it.\",\"confidence\":\"HIGH\"},\n {\"code\":\"BCM\",\"icao\":\"LRBC\",\"lat\":46.52194,\"lon\":26.91028,\"elev_m\":185,\"check\":\"OurAirports 46.52190,26.91030 (identical). OSM way 84575502 centroid 46.51924,26.91375 (about 400 m, polygon centroid rather than reference point). Straight-line distance 82.9 km, confirmed.\",\"confidence\":\"HIGH\"}\n],\n\"airports_note\":\"Use the Wikipedia/OurAirports reference-point coordinates above, not the OSM polygon centroids. Road km/min figures from OSRM were not re-run; their confidence is MEDIUM.\",\n\n\"discrepancies\":[\n {\"id\":1,\"item\":\"Where the A8 crosses the Siret\",\"claimed\":\"NODE: 'the A8 crosses the Siret east of the node, around lon 26.75-26.77'\",\"verified\":\"OSM intersection of Siret way 16883181 with A8 bridge ways 1357876571/1357876572 is at 47.20367,26.79083 (EU-DEM 198.6 m). The A8 bridge segments run lon 26.7726-26.7794 and 26.7860-26.7926, so this is a long viaduct over the floodplain. GEO's '47.2055,26.7900' is approximately right.\",\"correct_value\":{\"lat\":47.20367,\"lon\":26.79083},\"confidence\":\"HIGH\"},\n {\"id\":2,\"item\":\"Where the A8 crosses CFR line 500\",\"claimed\":\"GEO: 'about 47.2121,26.7410 just north of Stolniceni-Prajescu'\",\"verified\":\"OSM intersection of rail ref 500 ways 801758703/801758707 with A8 bridge ways 1357883902/1357883904 is at 47.21336,26.73575 (EU-DEM 223 m). The A8 crosses OVER the railway on a bridge. The claim is about 450 m off.\",\"correct_value\":{\"lat\":47.21336,\"lon\":26.73575},\"confidence\":\"HIGH\"},\n {\"id\":3,\"item\":\"Location of the A7 'Nod Pascani' local interchange\",\"claimed\":\"NODE says 47.2553,26.6905. GEO says it is a separate 'A7 x DN28A/DJ208' interchange at 47.2425,26.684.\",\"verified\":\"Both points belong to ONE interchange. The A7 ramps are at 47.2533-47.2632, 26.6868-26.6948 (OSM links 803115668-803115672, 1064150814), centre about 47.2565,26.6915. A connector of about 1.6 km (links 1064150809/1064150815) runs SSW to a relocated DN28A roundabout at 47.24216,26.68404 (OSM 1064150811 'DN28A Relocare'), which ties into DN28A 257593988. It connects to DN28A, not DJ208. DJ208 Str. Dragos Voda is further NE, at 47.258,26.705.\",\"correct_value\":{\"ramps_centre_lat\":47.25650,\"ramps_centre_lon\":26.69150,\"dn28a_roundabout_lat\":47.24216,\"dn28a_roundabout_lon\":26.68404},\"confidence\":\"MEDIUM-HIGH\"},\n {\"id\":4,\"item\":\"Nearest point of the Siret east of the node\",\"claimed\":\"NODE: 47.23970,26.75281\",\"verified\":\"The sampled OSM Siret main channel (way 16883181) at about lat 47.235-47.24 is near lon 26.762. 26.75281 may be a side arm or the floodplain edge. The main channel is about 2.7 km east of the station at the station's latitude (about lon 26.760).\",\"correct_value\":{\"lat\":47.23547,\"lon\":26.76265},\"confidence\":\"MEDIUM\"},\n {\"id\":5,\"item\":\"Node ground elevation\",\"claimed\":\"GEO says 250-265 m (264 m SRTM at 47.2135,26.7050)\",\"verified\":\"EU-DEM gives 266.1 m at the node. The station is 213.6 m, so the climb is about 52 m over 5 km. Consistent.\",\"confidence\":\"HIGH\"},\n {\"id\":6,\"item\":\"City hall elevation\",\"claimed\":\"GEO: 236 m (SRTM)\",\"verified\":\"EU-DEM gives 242.7 m at 47.24512,26.72408. Use about 240 m. This is minor.\",\"confidence\":\"MEDIUM\"},\n {\"id\":7,\"item\":\"Building bearing and length\",\"claimed\":\"158.3 deg, about 116 m\",\"verified\":\"158.4 deg, 116.6 m (longest OSM edge). Negligible difference.\",\"confidence\":\"HIGH\"}\n],\n\n\"confirmed_unchanged\":[\n \"Station building centroid and node, Triaj node, bus station on the forecourt (from the earlier results, consistent with Nominatim).\",\n \"A7 mainline near the node: way 1064086550 runs 47.19826,26.72203 -> 47.22198,26.69782 and way 1064150849 runs 47.22194,26.69767 -> 47.19820,26.72190. A7 Lot 3 ends at about 47.26325,26.68984, where A7 Lot 1 (no opening date) begins. Both CONFIRMED.\",\n \"A8 mainline inside the turbine: west end 47.20353,26.67792, then 47.21171,26.69710, 47.21388,26.70566 and 47.21478,26.71258, east to 47.21388,26.73286. CONFIRMED (opening_date 2026 between about 26.678 and 26.733).\",\n \"DJ208L runs through the turbine footprint, as claimed in the GEO light-rail corridor (A). CONFIRMED.\",\n \"Distances: node to Sodomeni 1.9 km WNW, to Triaj 3.5 km NE, to town centre 4.1 km NNE. Station to node 4.99 km at bearing 197 deg. All CONFIRMED by recomputation.\"\n],\n\n\"recommended_values_for_app\":{\n \"station_lat\":47.25689,\"station_lon\":26.72403,\"station_track_node_lat\":47.25691,\"station_track_node_lon\":26.72454,\"station_elev_m\":213.6,\n \"node_lat\":47.21388,\"node_lon\":26.70566,\"node_elev_m\":266,\"node_type\":\"turbine (turbion), A8 over A7 at centre\",\n \"A8_over_rail500_lat\":47.21336,\"A8_over_rail500_lon\":26.73575,\n \"A8_siret_bridge_lat\":47.20367,\"A8_siret_bridge_lon\":26.79083,\n \"A7_nod_pascani_lat\":47.25650,\"A7_nod_pascani_lon\":26.69150,\n \"IAS\":[47.17889,27.62000],\"SCV\":[47.68750,26.35417],\"BCM\":[46.52194,26.91028]\n},\n\n\"sources\":[\n \"https://nominatim.openstreetmap.org/search?q=Gara+Pascani ; /lookup?osm_ids=N3120900494,W841790852,N6508958248 ; search 'Aeroportul International Iasi', 'Aeroportul Suceava', 'Aeroportul Bacau'\",\n \"https://api.openstreetmap.org/api/0.6/map.json bbox 26.685,47.203,26.728,47.224 (turbine); 26.675,47.238,26.705,47.268 (Nod Pascani); 26.735,47.198,26.80,47.218 (A8 east, Siret, line 500); way/841790852/full.json (ODbL, fetched 2026-11-17)\",\n \"https://davidmegginson.github.io/ourairports-data/airports.csv (LRIA, LRSV, LRBC)\",\n \"https://api.opentopodata.org/v1/eudem25m\",\n \"https://profit.ro/povesti-cu-profit/auto-transporturi/foto-autostrada-bacau-pascani-prinde-contur-firmele-lui-umbrarescu-vor-construi-primul-nod-rutier-turbion-din-romania-21297327\",\n \"https://www.digi24.ro/stiri/economie/cum-va-arata-primul-nod-rutier-de-mare-viteza-de-tip-turbion-din-romania-va-avea-12-pasaje-8-bretele-si-5-podete-2663343\",\n \"https://economedia.ro/video-autostrada-a7-bacau-pascani-imagini-noi-din-zona-nodului-turbion-de-la-pascani-sodomeni-de-la-intersectia-autostrazilor-a7-a8.html\",\n \"https://newsweek.ro/economie/video-unde-se-construieste-prima-intersectie-de-autostrazi-de-tip-turbion-din-romania\",\n \"https://www.antena3.ro/actualitate/a-inceput-asfaltarea-la-cel-mai-mare-nod-rutier-din-romania-pe-a7-intre-mircesti-si-pascani-va-lega-marile-coridoare-europene-795485.html\"\n],\n\"scratch_files\":\"C:\\\\Users\\\\Silviu\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c55bbf394fc1b177\\\\45db847f-93c8-449c-a73f-b6a0c9ea733c\\\\scratchpad\\\\ov\\\\ (raw OSM JSON: map.json, west.json, east.json, bld.json); analysis scripts in ...\\\\scratchpad\\\\scripts\\\\\"\n}"
+}
