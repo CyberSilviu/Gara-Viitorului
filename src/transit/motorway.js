@@ -89,6 +89,17 @@ export function buildMotorways(ctx, shared, route = null) {
     }
     return false;
   };
+  // punct (stalp) aflat pe o alta cale de la acelasi nivel / de deasupra (pasaj), sau la < 1,2 m de marginea ei
+  const laneClash = (x, z, y, self) => {
+    const gx = Math.floor(x / CELL), gz = Math.floor(z / CELL);
+    for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) for (const [o, j] of sGrid.get((gx + dx) + ',' + (gz + dz)) || []) {
+      if (o === self || j >= o.pts.length - 1 || o.Y[j] < y - 1.5 || o.Y[j] > y + 12.5) continue; // stalp de 11 m: nici sub un pasaj
+      const a = o.pts[j], b = o.pts[j + 1], vx = b[0] - a[0], vz = b[1] - a[1];
+      const u = Math.max(0, Math.min(1, ((x - a[0]) * vx + (z - a[1]) * vz) / (vx * vx + vz * vz || 1)));
+      if (Math.hypot(a[0] + vx * u - x, a[1] + vz * u - z) < o.width / 2 + 1.2) return true;
+    }
+    return false;
+  };
   const quadSide = (arr, sd, a, b, c, d) => { if (sd > 0) arr.push(...b, ...d, ...a, ...a, ...d, ...c); else arr.push(...a, ...c, ...b, ...b, ...c, ...d); };
   for (const w of ways) {
     const smp = samplesOf(w);
@@ -156,7 +167,13 @@ export function buildMotorways(ctx, shared, route = null) {
       for (const p of smp) {
         const dn = Math.hypot(p.x - nodeXZ.x, p.z - nodeXZ.z);
         if (dn > 1500) continue;
-        if (p.s - last > 48) { last = p.s; lampPos.push({ x: p.x + p.rx * (hw + 0.9), y: p.y, z: p.z + p.rz * (hw + 0.9), yaw: Math.atan2(p.rx, p.rz) }); }
+        if (p.s - last <= 48) continue;
+        // stalpul sta in spatele parapetului (fata exterioara la hw + 0,5 m): la 1,7 m de marginea carosabilului,
+        // si la >= 1,2 m de marginea ORICAREI alte cai (bretele alaturate, zone de convergenta)
+        const lx = p.x + p.rx * (hw + 1.7), lz = p.z + p.rz * (hw + 1.7);
+        if (laneClash(lx, lz, p.y, w)) continue;
+        last = p.s;
+        lampPos.push({ x: lx, y: p.y, z: lz, yaw: Math.atan2(p.rx, p.rz) });
       }
     }
   }

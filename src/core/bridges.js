@@ -1,20 +1,31 @@
 import * as THREE from 'three';
 import { GeoBuf, SegmentIndex, canvasTexture, rng } from './util.js';
 import { unproject } from './geo.js';
-import { toLocal, toWorld } from '../station/frame.js';
+import { ROUTE } from '../transit/route-data.js';
 
 // Poduri rutiere reale (OSM bridge=yes) si rampele lor de acces.
 //  1) planBridges: cota tablierului = max pe deschidere (teren + gabarit) – 7,0 m peste CF (catenara 25 kV),
 //     5,5 m peste drumuri, 3 m peste apa – plus grosimea tablierului; drumurile legate (capete la < 1 m) urca /
 //     coboara spre pod cu panta <= 5,5 % (rampe pe rambleu cu ziduri de sprijin).
 //  2) buildBridgeStructures: tablier (beton), trotuare cu borduri, parapete + mana curenta, pile intre linii
-//     (niciodata pe o sina sau pe culoarul T1 de la vest de linii), culei la capete, ziduri de sprijin la rampe.
+//     (niciodata la < RAIL_CLEAR de o sina sau la < T1_CLEAR de axa liniei T1 – traseul real din route-data.js),
+//     culei la capete, ziduri de sprijin la rampe. Unde T1 nu lasa loc, deschiderea creste (pila mutata mai departe).
 
 export const RAMP_GRADE = 0.055;
 export const CLEARANCE = { rail: 7.0, road: 5.5, water: 3.0 };
 export const DECK_DEPTH = 1.45;      // de la suprafata drumului la intradosul tablierului
 const BRIDGE_WALK = 1.8;             // trotuar pe pod (fiecare parte)
 const PARAPET_W = 0.4, PARAPET_H = 1.05;
+export const RAIL_CLEAR = 3.6;       // distanta minima de la orice punct al pilei la o sina CF
+export const T1_CLEAR = 5.0;         // distanta minima de la orice punct al pilei la axa T1 (gabarit + catenara + spatiu de siguranta)
+const PIER_HALF = 0.9;               // jumatate din grosimea riglei pilei, de-a lungul drumului
+
+// axa T1 (traseul generat din OSM), indexata o singura data
+let t1IndexCache = null;
+function t1Index() {
+  if (!t1IndexCache) { t1IndexCache = new SegmentIndex(40); if (ROUTE?.pts?.length > 1) t1IndexCache.addPolyline(ROUTE.pts, 0, 't1'); }
+  return t1IndexCache;
+}
 
 const keyOf = (x, z) => Math.round(x) + ',' + Math.round(z);
 
@@ -199,7 +210,7 @@ function concreteTexture() {
 }
 
 // items / profiles / bridges din planBridges; walkW(it) = latimea trotuarului lateral (0 daca nu are)
-export function buildBridgeStructures({ items, profiles, bridges, groundY, terrainH, railIndex, waterIndex, walkW }) {
+export function buildBridgeStructures({ items, profiles, bridges, groundY, terrainH, railIndex, waterIndex, walkW, avoidT1 = true }) {
   const group = new THREE.Group();
   group.name = 'poduri-rutiere';
   const conc = new GeoBuf(), walk = new GeoBuf(), steel = new GeoBuf();
@@ -207,22 +218,22 @@ export function buildBridgeStructures({ items, profiles, bridges, groundY, terra
   const ground = (i, x, z) => terrainH(x, z) - 0.8;
   let pierCount = 0;
 
-  // directia "vest" din sistemul garii (culoarul T1 este la vest de linii)
-  const westOf = (x, z) => { const [lx, lz] = toLocal(x, z); const [wx, wz] = toWorld(lx - 1, lz); return [wx - x, wz - z]; };
-  const pierOk = (x, z, it) => {
-    if (railIndex) {
-      const d = railIndex.nearest(x, z, 12).d;
-      if (d < 3.6) return false;
-      if (d < 10.5) { // margine de vest a fascicolului de linii => culoarul T1
-        const [wx, wz] = westOf(x, z);
-        let westRail = false;
-        for (let k = 3; k <= 30 && !westRail; k += 1.5) if (railIndex.nearest(x + wx * k, z + wz * k, 2.5).d < 2.5) westRail = true;
-        if (!westRail) return false;
-      }
-    }
+  const t1 = avoidT1 ? t1Index() : null;
+  const railD = (x, z) => (railIndex ? railIndex.nearest(x, z, 12).d : Infinity);
+  const t1D = (x, z) => (t1 ? t1.nearest(x, z, 12).d : Infinity);
+  const pierOk = (x, z) => {
+    if (railD(x, z) < RAIL_CLEAR) return false;
+    if (t1D(x, z) < T1_CLEAR) return false;
     if (waterIndex) { const nw = waterIndex.nearest(x, z, 40); if (nw.seg && nw.d < nw.seg.r + 2) return false; }
     return true;
   };
+  // amprenta pilei (rigla 1,8 m x toata latimea): puncte din metru in metru pe latime, pe 3 linii de-a lungul drumului
+  const footprint = (x, z, f, W) => {
+    const out = [];
+    for (let o = -W; o <= W + 1e-6; o += Math.max(0.5, W / Math.ceil(W))) for (const t of [-PIER_HALF, 0, PIER_HALF]) out.push([x + f.nx * o + f.tx * t, z + f.nz * o + f.tz * t]);
+    return out;
+  };
+  const piers = [];
 
   for (const b of bridges) {
     const it = items[b.idx];
@@ -250,10 +261,9 @@ export function buildBridgeStructures({ items, profiles, bridges, groundY, terra
       if (k < 0) continue;
       const t = (d - s[k]) / Math.max(1e-6, s[k + 1] - s[k]);
       const x = pts[k][0] + (pts[k + 1][0] - pts[k][0]) * t, z = pts[k][1] + (pts[k + 1][1] - pts[k][1]) * t;
-      // toata latimea pilei trebuie sa fie libera
-      let ok = true;
-      for (const o of [-W + 1, 0, W - 1]) if (!pierOk(x + F[k].nx * o, z + F[k].nz * o, it)) { ok = false; break; }
-      if (ok) cand.push({ d, x, z, k });
+      // toata amprenta pilei trebuie sa fie libera (sine, axa T1, apa)
+      const fp = footprint(x, z, { tx: F[k].tx, tz: F[k].tz, nx: -F[k].tz, nz: F[k].tx }, W - 0.2);
+      if (fp.every(([px, pz]) => pierOk(px, pz))) cand.push({ d, x, z, k, fp });
     }
     let last = 0;
     for (let ci = 0; ci < cand.length; ci++) {
@@ -263,6 +273,9 @@ export function buildBridgeStructures({ items, profiles, bridges, groundY, terra
       if (c.d - last >= 22 || (c.d - last >= 12 && nextD - last > 30)) {
         sup.push(c.d); last = c.d;
         const { k, x, z } = c;
+        let mt = Infinity, mr = Infinity;
+        for (const [px, pz] of c.fp) { mt = Math.min(mt, t1Index().nearest(px, pz, 60).d); mr = Math.min(mr, railIndex ? railIndex.nearest(px, pz, 60).d : Infinity); }
+        piers.push({ id: b.id, d: c.d, x, z, t1: mt, rail: mr });
         const tx = F[k].tx, tz = F[k].tz, nx = -tz, nz = tx;
         // rigla (cap) + 3 coloane
         const capPts = [[x - nx * (W - 0.2), z - nz * (W - 0.2)], [x + nx * (W - 0.2), z + nz * (W - 0.2)]];
@@ -329,5 +342,5 @@ export function buildBridgeStructures({ items, profiles, bridges, groundY, terra
     m.castShadow = true; m.receiveShadow = true; m.name = 'poduri-' + k;
     group.add(m);
   }
-  return { group, pierCount };
+  return { group, pierCount, piers };
 }

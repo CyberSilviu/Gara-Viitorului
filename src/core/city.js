@@ -449,7 +449,7 @@ export async function createCity(ctx, { exclude = [] } = {}) {
     setSatelliteMode, isSatelliteMode: () => satellite,
     group, osm, footprints: footprintIndex, buildingCount,
     trackField, roads: roadRuns, roadIndex, railIndex, waterIndex, landuse,
-    roadHeightAt: roads.roadHeightAt, bridges: roads.bridges, roofTint,
+    roadHeightAt: roads.roadHeightAt, bridges: roads.bridges, bridgePiers: roads.bridgePiers, roofTint,
   };
 }
 

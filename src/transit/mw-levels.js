@@ -267,6 +267,7 @@ export function solveLevels(roads, rivers, H, opts = {}) {
     });
   }
   harmonize(ways);
+  pinJoints(ways);
   let maxLift = 0;
   const levelCounts = [0, 0, 0, 0];
   for (const w of ways) {
@@ -325,6 +326,107 @@ function harmonize(ways) {
       out[k] = val * (0.5 + 0.5 * Math.cos(Math.PI * t));
     }
     for (let k = 0; k < n; k++) w.Y[k] += out[k];
+  }
+}
+
+// Racordari / bifurcatii: capatul unei bretele (sau drum) care se lipeste de o alta cale – varf OSM comun sau capat
+// la < JOINT m de axul ei, adesea la mijlocul caii principale (nodurile de mai sus vad doar capetele comune) – preia
+// cota caii principale (autostrada > bretea > drum). Profilul bretelei se corecteaza intr-un „con” cu panta GRADE
+// pornind de la capat: unde iese din con este tras pe marginea lui (urcare / coborare mai lunga); daca bretea e prea
+// scurta, conul de la celalalt capat (fix) o ridica / coboara pe toata lungimea. Fara trepte in tablier.
+const JOINT = 3;
+export function wayJoints(ways) {
+  const rankT = (w) => (w.type === 'mw' ? 3 : w.type === 'link' ? 2 : 1);
+  const CELL = 40, grid = new Map();
+  for (const w of ways) for (let i = 0; i < w.pts.length - 1; i++) {
+    const k = Math.floor(w.pts[i][0] / CELL) + ',' + Math.floor(w.pts[i][1] / CELL);
+    if (!grid.has(k)) grid.set(k, []);
+    grid.get(k).push([w, i]);
+  }
+  const tan = (w, i) => {
+    const a = w.pts[Math.max(0, i - 1)], b = w.pts[Math.min(w.pts.length - 1, i + 1)];
+    const dx = b[0] - a[0], dz = b[1] - a[1], l = Math.hypot(dx, dz) || 1;
+    return [dx / l, dz / l];
+  };
+  const out = [];
+  for (const w of ways) for (const e of [0, w.pts.length - 1]) {
+    const [x, z] = w.pts[e], ke = e ? w.k1 : w.k0;
+    const gx = Math.floor(x / CELL), gz = Math.floor(z / CELL);
+    const best = new Map();
+    for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) for (const [o, i] of grid.get((gx + dx) + ',' + (gz + dz)) || []) {
+      if (o === w) continue;
+      const [ax, az] = o.pts[i], [bx, bz] = o.pts[i + 1];
+      const sx = bx - ax, sz = bz - az, L2 = sx * sx + sz * sz || 1e-9;
+      const t = Math.max(0, Math.min(1, ((x - ax) * sx + (z - az) * sz) / L2));
+      const d = Math.hypot(x - ax - sx * t, z - az - sz * t);
+      if (d >= JOINT) continue;
+      const pr = best.get(o);
+      if (!pr || d < pr.d) best.set(o, { o, i, t, d });
+    }
+    for (const { o, i, t, d } of best.values()) {
+      const oEnd = (i === 0 && t < 1e-6) || (i === o.pts.length - 2 && t > 1 - 1e-6);
+      // capat-la-capat: urmeaza calea de rang mai mare (la egalitate, cea cu id mai mic)
+      if (oEnd && (rankT(o) < rankT(w) || (rankT(o) === rankT(w) && o.id > w.id))) continue;
+      if (!oEnd && w.type === 'mw' && o.type !== 'mw') continue; // autostrada nu se lipeste de o bretea / un drum
+      const shared = o.keys.has(ke);
+      if (!shared) {
+        // capat apropiat fara varf comun: doar daca e o racordare (tangenta) sau cotele sunt deja apropiate,
+        // nu un capat care trece pe sub / peste un pasaj
+        const a = tan(w, e), b = tan(o, i);
+        if (Math.abs(a[0] * b[1] - a[1] * b[0]) > 0.5 && Math.abs(o.Y[i] * (1 - t) + o.Y[i + 1] * t - w.Y[e]) > 2.5) continue;
+      }
+      out.push({ w, e, o, i, t, d, shared });
+    }
+  }
+  return out;
+}
+function pinJoints(ways) {
+  const g = GRADE;
+  for (let pass = 0; pass < 4; pass++) {
+    let moved = 0;
+    // cai cu rang mic la urma: stapanul e deja final cand ii copiem cota
+    const joints = wayJoints(ways).sort((p, q) => (q.o.type === 'mw') - (p.o.type === 'mw'));
+    const byWay = new Map();
+    for (const j of joints) { if (!byWay.has(j.w)) byWay.set(j.w, []); byWay.get(j.w).push(j); }
+    for (const [w, js] of byWay) {
+      const n = w.pts.length;
+      // tinta la fiecare capat (daca sunt mai multe cai, cea mai apropiata)
+      const tgt = [null, null];
+      for (const j of js) {
+        const y = j.o.Y[j.i] * (1 - j.t) + j.o.Y[j.i + 1] * j.t, slot = j.e ? 1 : 0;
+        if (!tgt[slot] || j.d < tgt[slot].d) tgt[slot] = { y, d: j.d };
+      }
+      if (!tgt.some((q) => q && Math.abs(q.y - (q === tgt[0] ? w.Y[0] : w.Y[n - 1])) > 0.01)) continue;
+      // conuri de panta GRADE din capete (capatul liber ramane ca atare daca nu e legat)
+      const lo = new Float64Array(n).fill(-Infinity), hi = new Float64Array(n).fill(Infinity);
+      for (const [slot, q] of tgt.entries()) {
+        if (!q) continue;
+        for (let k = 0; k < n; k++) {
+          const ds = slot ? w.len - w.S[k] : w.S[k];
+          lo[k] = Math.max(lo[k], q.y - g * ds); hi[k] = Math.min(hi[k], q.y + g * ds);
+        }
+      }
+      const Y = Float64Array.from(w.Y);
+      for (let k = 0; k < n; k++) {
+        // conurile se pot contrazice doar daca bretea e prea scurta pentru diferenta dintre capete (lo > hi):
+        // atunci interpolare liniara intre cele doua cote (panta peste GRADE, inevitabila)
+        if (lo[k] > hi[k]) { const u = w.S[k] / w.len; Y[k] = tgt[0].y * (1 - u) + tgt[1].y * u; } else Y[k] = Math.min(hi[k], Math.max(lo[k], Y[k]));
+      }
+      if (tgt[0]) Y[0] = tgt[0].y;
+      if (tgt[1]) Y[n - 1] = tgt[1].y;
+      let dmax = 0;
+      for (let k = 0; k < n; k++) {
+        const dy = Y[k] - w.Y[k];
+        if (Math.abs(dy) < 1e-9) continue;
+        dmax = Math.max(dmax, Math.abs(dy));
+        w.Y[k] = Y[k];
+        w.lift[k] += dy;
+        if (!w.tunnel && w.lift[k] > 4.6) w.deck[k] = true;
+        else if (w.lift[k] <= 2.5) w.deck[k] = false;
+      }
+      if (dmax > 0.005) moved++;
+    }
+    if (!moved) break;
   }
 }
 

@@ -331,7 +331,6 @@ const roadsX = crossList(osm.roads, (w) => w.k !== 'construction').map((c) => ({
 const railX = crossList(rails).map((c) => ({ s: c.s, svc: c.w.svc || '', id: c.w.id, ang: crossAngle(c) }));
 const dnS = Math.round(sAt(...DN28A));
 // podul DN28A: drumul trece PESTE linie (puntea e construita de modulul orasului, ~7 m peste sine)
-const roadsMajor = roadsX.filter((r) => ['trunk', 'primary', 'secondary'].includes(r.k));
 
 // ---------- statii ----------
 const stops = [
@@ -433,7 +432,10 @@ export const ROUTE = {
   stops: ${JSON.stringify(stops)},
   streams: ${JSON.stringify(streams)},
   demolish: ${JSON.stringify(demolish.map((d) => d.c))},
-  roadCrossings: ${JSON.stringify(roadsMajor.map(({ s, ref, n }) => ({ s, ref, n })))},
+  // TOATE drumurile OSM taiate de axa T1 (s crescator): k = clasa, ang = unghi (90 = perpendicular),
+  // pod = drumul trece PE POD peste T1 (DN28A). Tratamentul (trecere la nivel / pasaj T1 / cale inglobata) il alege
+  // src/transit/route.js dupa profilul in lung (vezi tabelul din consola: „T1 × drumuri”).
+  roadCrossings: ${JSON.stringify([...roadsX].sort((a, b) => a.s - b.s).map(({ s, ref, n, k, ang, br }) => ({ s, k, ref, n, ang, pod: br })))},
 };
 `;
 const OUT = process.env.ROUTE_OUT || path.join(ROOT, 'src/transit/route-data.js');

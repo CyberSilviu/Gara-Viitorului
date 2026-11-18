@@ -10,7 +10,8 @@
     "data": "node scripts/fetch-osm.mjs && node scripts/fetch-dem.mjs && node scripts/clean-buildings.mjs && node scripts/fetch-satellite.mjs",
     "data:api": "node scripts/fetch-osm-api.mjs && node scripts/clean-buildings.mjs",
     "data:clean": "node scripts/clean-buildings.mjs",
-    "data:sat": "node scripts/fetch-satellite.mjs"
+    "data:sat": "node scripts/fetch-satellite.mjs",
+    "audit": "node scripts/audit-coliziuni.mjs"
   },
   "dependencies": {
     "three": "^0.170.0"

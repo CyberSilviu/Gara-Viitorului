@@ -1,6 +1,6 @@
 // Relatia liniei T1 cu drumurile si caile ferate desenate de oras (logica pura, fara Three.js –
 // se poate testa in Node).
-import { GROUND_LIFT } from '../core/util.js';
+import { GROUND_LIFT, roadStyle } from '../core/util.js';
 //
 // Orasul (src/core/city.js) deseneaza drumurile OSM ca panglici drapate pe teren, ridicate cu GROUND_LIFT
 // (src/core/util.js: minor 0,10 / major 0,13 / autostrada 0,15 / CF 0,20 m peste heightAt) si cu polygonOffset. T1 merge ~4,4 km pe strazi (Str. Garii, Vatra, Stefan cel Mare, DJ208L): daca platforma
@@ -9,7 +9,8 @@ import { GROUND_LIFT } from '../core/util.js';
 //  - need[i]    = cota minima a platformei (suprafata drumului / CF de dedesubt + garda);
 //  - surf[i]    = cota suprafetei celui mai inalt drum suprapus (NaN daca nu exista);
 //  - onRoad[i]  = 1 daca platforma calca pe un drum (bordura devine perete vertical, nu taluz verde);
-// si lista trecerilor la nivel (drumuri care taie linia sub un unghi > 35°), unde punem dale de trecere.
+// si lista trecerilor la nivel (drumuri care taie axa sub un unghi > 20°; tratamentul – trecere la nivel cu
+// sina la cota asfaltului sau pasaj – il alege route.js dupa profilul in lung).
 
 // latimile panglicilor (aceleasi ca in src/core/city.js)
 export const ROAD_WIDTH = {
@@ -27,7 +28,7 @@ export const SURFACE_LIFT = {
 export const ROAD_CLEAR = 0.25;   // platforma T1 sta cu cel putin atat peste asfalt
 export const RAIL_CLEAR = 0.35;   // ... si peste panglicile CF ale orasului (au polygonOffset mai puternic)
 const MAJOR = new Set(['trunk', 'primary', 'secondary', 'trunk_link', 'primary_link']);
-const CROSS_SIN = Math.sin((35 * Math.PI) / 180);
+const CROSS_SIN = Math.sin((20 * Math.PI) / 180);
 
 export function roadBucket(k) {
   return k.startsWith('motorway') ? 'motorway' : MAJOR.has(k) ? 'major' : 'minor';
@@ -42,8 +43,9 @@ export function cityStrips(osm, opts = {}) {
     // drumurile in constructie sunt redesenate de motorway.js (cu cota impusa la trecerea T1)
     if (!w.p || w.p.length < 2 || w.k === 'construction') continue;
     const b = roadBucket(w.k);
-    const hw = (width[w.k] || 5) / 2;
-    for (let i = 0; i < w.p.length - 1; i++) out.push({ a: w.p[i], b: w.p[i + 1], hw, lift: lift[b], clear: ROAD_CLEAR, road: true, n: w.n || w.ref || w.k, k: w.k });
+    // latimea desenata de oras (util.js roadStyle, inclusiv benzile din OSM)
+    const hw = (opts.width?.[w.k] || roadStyle(w).width || 5) / 2;
+    for (let i = 0; i < w.p.length - 1; i++) out.push({ a: w.p[i], b: w.p[i + 1], hw, lift: lift[b], clear: ROAD_CLEAR, road: true, n: w.n || w.ref || w.k, ref: w.ref || '', k: w.k });
   }
   for (const w of osm.rails || []) {
     if (!w.p || w.p.length < 2 || w.k === 'platform') continue;
@@ -161,7 +163,8 @@ export function analyseRoads(P, S, osm, H, edgeFn, opts = {}) {
       const e = edgeFn(s);
       const half = g.hw / sin + (e * cos) / sin + 0.6;
       const x = A[0] + rx * t, z = A[1] + rz * t;
-      crossings.push({ s, s0: s - half, s1: s + half, x, z, y: H(x, z) + g.lift, sin, n: g.n, k: g.k, pinned: !!g.pinned });
+      const ql = Math.hypot(qx, qz) || 1;
+      crossings.push({ s, s0: s - half, s1: s + half, x, z, y: H(x, z) + g.lift, sin, n: g.n, ref: g.ref || '', k: g.k, hw: g.hw, dx: qx / ql, dz: qz / ql, pinned: !!g.pinned });
     }
   }
   crossings.sort((a, b) => a.s - b.s);

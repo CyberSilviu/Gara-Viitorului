@@ -160,7 +160,7 @@ export function addTransitInfo(ctx, { route, fleet, motorway, hub, airports }) {
     benefit: 'Cu un singur bilet integrat ajungi din trenul CFR, prin T1, în autocarul spre aeroport. Pașcaniul devine poarta de intrare în Moldova pentru turiștii care aterizează la Iași, Suceava sau Bacău, și invers.',
     data: [['Acoperiș fotovoltaic', '≈ 7.200 m² · ≈ 1,4 MWp'], ['Peroane autocare', '4 (3 spre aeroporturi)'], ['Park & Ride', '≈ 180 locuri'], ['Transfer T1 → autocar', 'sub 3 minute pe jos'], ['Bilet integrat', 'CFR + T1 + autocar']],
     view: { position: hub.toWorld(110, hub.levelB + 70, -90), target: hub.toWorld(-4, hub.levelB, 40) },
-    walk: { position: hub.entrance.clone().add(V(0, 1, 0)), yaw: hub.walkYaw },
+    walk: { position: hub.walkStart.position.clone(), yaw: hub.walkStart.yaw },
   });
   add({
     id: 'hub-aeroporturi', category: 'mobility', title: 'Autocare directe spre 3 aeroporturi',
@@ -239,7 +239,7 @@ export function addTransitInfo(ctx, { route, fleet, motorway, hub, airports }) {
   const mid = route.pos(L * 0.45);
   ctx.places.push(
     { name: 'Traseul T1', sub: `Gara → Hub Turbion · ${nf(L / 1000, 1)} km`, icon: '🚊', view: { position: mid.clone().add(V(-1800, 2300, -600)), target: mid.clone() } },
-    { name: 'Hub Turbion A7×A8', sub: 'Plimbare pe piața hub-ului', icon: '🚏', walk: { position: hub.entrance.clone().add(V(0, 1, 0)), yaw: hub.walkYaw } },
+    { name: 'Hub Turbion (plimbare)', sub: 'Peronul T1 → hol, etaj, acoperiș, autocare, parcare', icon: '🚶', walk: { position: hub.walkStart.position.clone(), yaw: hub.walkStart.yaw } },
     { name: 'Nodul turbion (vedere)', sub: 'A7 × A8 · Pașcani – Sodomeni', icon: '🌀', view: { position: V(nx + 1100, ny + 750, nz - 900), target: V(nx, ny, nz) } },
     { name: 'Stația Centru – Spital', sub: 'T1 · lift și scări spre podul DN28A', icon: '🏥', view: viewAt(stops[2].s, 60, 28) },
     { name: 'T1 în culoarul CF', sub: 'linie proprie lângă calea ferată', icon: '🛤️', view: viewAt(900, 90, 45, -1) },

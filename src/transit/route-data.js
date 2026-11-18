@@ -11,5 +11,8 @@ export const ROUTE = {
   stops: [{"id":"gara","name":"Gara Pașcani (peron 1)","s":26,"term":true},{"id":"electroputere","name":"Electroputere","s":536},{"id":"centru","name":"Centru – Spital (pod DN28A)","s":1344},{"id":"triaj","name":"Triaj","s":2172},{"id":"stefan","name":"Ștefan cel Mare","s":3228},{"id":"hub","name":"Hub Turbion A7×A8","s":4819,"term":true}],
   streams: [{"s":2365,"k":"stream","n":""}],
   demolish: [[18.6,65],[33.9,77.3],[40.7,86.5],[50.4,122.6],[82.5,212.8],[108,272.5],[123.1,288.7],[119.6,313.3],[137.9,327],[133.2,347.4],[145.5,378.9],[195.3,481.2],[205,502.4],[216.1,535.8],[246.4,591.7],[265.2,656.7],[332.5,818.3],[342.5,845.6],[556.7,1381.2],[625.7,1630.7],[332.5,2921.4],[273.2,3027.7],[249,3042],[143.6,3152.2]],
-  roadCrossings: [{"s":4301,"ref":"DJ208L","n":""},{"s":3178,"ref":"DJ208","n":"Strada Ștefan cel Mare"},{"s":1393,"ref":"DN28A","n":"Strada Grădiniței"}],
+  // TOATE drumurile OSM taiate de axa T1 (s crescator): k = clasa, ang = unghi (90 = perpendicular),
+  // pod = drumul trece PE POD peste T1 (DN28A). Tratamentul (trecere la nivel / pasaj T1 / cale inglobata) il alege
+  // src/transit/route.js dupa profilul in lung (vezi tabelul din consola: „T1 × drumuri”).
+  roadCrossings: [{"s":1393,"k":"primary","ref":"DN28A","n":"Strada Grădiniței","ang":78,"pod":true},{"s":2978,"k":"unclassified","ref":"","n":"Strada Prisăcii","ang":76,"pod":false},{"s":3178,"k":"secondary","ref":"DJ208","n":"Strada Ștefan cel Mare","ang":50,"pod":false},{"s":3328,"k":"residential","ref":"","n":"","ang":31,"pod":false},{"s":3424,"k":"residential","ref":"","n":"Strada Vârful Dealului","ang":62,"pod":false},{"s":4301,"k":"secondary","ref":"DJ208L","n":"","ang":6,"pod":false}],
 };

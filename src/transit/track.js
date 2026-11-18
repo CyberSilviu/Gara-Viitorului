@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { merge, tint, sweepProfile, sweepStrip, makeCanvas, canvasTex } from './util3d.js';
+import { merge, tint, box, cyl, sweepProfile, makeCanvas, canvasTex } from './util3d.js';
 import { TRACK_HALF } from './route.js';
 import { ROUTE } from './route-data.js';
 
@@ -59,6 +59,9 @@ export function buildTrack(ctx, route, mats) {
 
   // ---------- platforma inierbata (latime variabila: se ingusteaza la capete) ----------
   const edge = (s) => TRACK_HALF * ramp(s) + 1.75;
+  // zone cu cale inglobata la cota asfaltului (treceri la nivel + tronsonul comun cu DJ208L), vezi route.js
+  const zones = route.levelZones || [];
+  const inLevel = (s) => zones.some((c) => s >= c.s0 && s <= c.s1);
   const axis = route.samples(0, L, DS);
   const bedPos = [], bedUv = [], balPos = [], balUv = [];
   for (let i = 0; i < axis.length - 1; i++) {
@@ -66,6 +69,7 @@ export function buildTrack(ctx, route, mats) {
     const ep = edge(p.s), eq = edge(q.s);
     const A = [p.x - p.rx * ep, p.y, p.z - p.rz * ep], B = [p.x + p.rx * ep, p.y, p.z + p.rz * ep];
     const C = [q.x - q.rx * eq, q.y, q.z - q.rz * eq], D = [q.x + q.rx * eq, q.y, q.z + q.rz * eq];
+    if (inLevel((p.s + q.s) / 2)) continue; // dala de trecere (mai jos) inlocuieste gazonul / balastul
     const bal = inCorr((p.s + q.s) / 2);
     (bal ? balPos : bedPos).push(...B, ...D, ...A, ...A, ...D, ...C);
     (bal ? balUv : bedUv).push(1, p.s, 1, q.s, 0, p.s, 0, p.s, 1, q.s, 0, q.s);
@@ -84,11 +88,33 @@ export function buildTrack(ctx, route, mats) {
 
   // ---------- sine (2 linii x 2 fire) ----------
   const railProfile = [[-0.04, -0.05], [-0.04, 0.16], [0.04, 0.16], [0.04, -0.05]];
+  // In zonele la nivel fiecare fir urmareste asfaltul de sub el (ciuperca = asfalt + 1 cm; drumul drapat pe teren
+  // are panta transversala, deci firele capata o mica supraînaltare), cu racordare liniara pe 4 m la capete;
+  // esantionare la 0,5 m in zone, 4 m in rest.
+  const RHr = ctx.city?.roadHeightAt;
+  const zw = (s) => { let w = 0; for (const c of zones) w = Math.max(w, s >= c.s0 && s <= c.s1 ? 1 : Math.max(0, 1 - Math.min(Math.abs(s - c.s0), Math.abs(s - c.s1)) / 4)); return w; };
+  function railSamples(latFn) {
+    const cuts = [0];
+    for (const c of [...zones].sort((a, b) => a.s0 - b.s0)) { const a = Math.max(cuts[cuts.length - 1], c.s0 - 4), b = Math.min(L, c.s1 + 4); if (b > a) cuts.push(a, b); }
+    cuts.push(L);
+    const out = [];
+    for (let k = 0; k < cuts.length - 1; k++) {
+      if (cuts[k + 1] - cuts[k] < 1e-3) continue;
+      const part = route.samples(cuts[k], cuts[k + 1], k % 2 ? 0.5 : DS, latFn);
+      out.push(...(out.length ? part.slice(1) : part));
+    }
+    if (RHr) for (const p of out) {
+      const w = zw(p.s);
+      if (w <= 0) continue;
+      const r = RHr(p.x, p.z, p.y + 0.15);
+      if (r != null && Math.abs(r - (p.y + 0.15)) < 0.4) p.y += w * (r - 0.15 - p.y);
+    }
+    return out;
+  }
   const railGeos = [];
   for (const side of [-1, 1]) {
     for (const r of [-0.7175, 0.7175]) {
-      const smp = route.samples(0, L, DS, (s) => side * TRACK_HALF * ramp(s) + r);
-      railGeos.push(sweepProfile(smp, railProfile, { color: 0x9aa3ab }));
+      railGeos.push(sweepProfile(railSamples((s) => side * TRACK_HALF * ramp(s) + r), railProfile, { color: 0x9aa3ab }));
     }
   }
   const rails = new THREE.Mesh(merge(railGeos), mats.steel);
@@ -97,9 +123,8 @@ export function buildTrack(ctx, route, mats) {
   group.add(rails);
 
   // ---------- bordura cu LED + rambleu (taluz) ----------
-  const crossings = route.crossings || [];
-  // segment complet in zona unei treceri la nivel (acolo platforma e pavata, fara borduri / taluz)
-  const inCrossing = (s0, s1) => crossings.some((c) => s0 >= c.s0 && s1 <= c.s1);
+  // segment atins de o zona la nivel (acolo platforma e pavata, fara borduri / taluz)
+  const inCrossing = (s0, s1) => zones.some((c) => s1 >= c.s0 && s0 <= c.s1);
   const kerb = [], led = [], slope = [], deck = [], parapet = [], wall = [], balSlope = [];
   for (let i = 0; i < axis.length - 1; i++) {
     const p = axis[i], q = axis[i + 1];
@@ -174,30 +199,57 @@ export function buildTrack(ctx, route, mats) {
   ledMesh.name = 't1-led';
   group.add(ledMesh);
 
-  // ---------- treceri la nivel: dala pavata la nivelul sinelor + rampe pana la asfaltul strazii ----------
-  const cross = [];
-  for (const c of crossings) {
-    if (c.pinned) continue; // drum nou adus de motorway.js la cota caii (asfaltul lui e dala de trecere)
+  // ---------- cale inglobata (treceri la nivel + tronson comun cu DJ208L) ----------
+  // Profilul T1 e fixat in aceste zone la cota asfaltului (route.js): ciuperca sinei = asfalt + 1 cm. Dala (beton
+  // asfaltic) e drapata pe ctx.city.roadHeightAt(x, z) + 2 mm => continua suprafata drumului pe toata latimea
+  // platformei; unde platforma iese de pe carosabil dala sta la nivelul ciupercii. Capetele dalei: fata verticala
+  // pana la gazon. Polygon offset-ul caii (mai puternic decat al orasului) => dala acopera panglica drumului.
+  const RH = ctx.city?.roadHeightAt;
+  const slabPos = [], slabEnds = [];
+  const slabY = (x, z, yT) => { const r = RH ? RH(x, z, yT) : null; return r != null && Math.abs(r - yT) < 0.4 ? r + 0.002 : yT - 0.005; };
+  const _o = new THREE.Vector3();
+  for (const c of zones) {
     const s0 = Math.max(0, c.s0), s1 = Math.min(L, c.s1);
     if (s1 - s0 < 1) continue;
     let E = 0;
     for (let s = s0; s <= s1; s += 1) E = Math.max(E, edge(s));
     E += 0.25;
-    const smp = route.samples(s0, s1, 1);
-    const top = 0.135; // ciupercile sinelor (+0,16) ies 2,5 cm din dala (fara palpaire la distanta)
-    cross.push(sweepStrip(smp, -E, E, top));
-    const drop = Math.min(top, c.y - route.heightAtS(c.s) + 0.04);
-    const RW = 4; // latimea rampei
-    cross.push(sweepStrip(smp, E, E + RW, top, { dy2: drop }));
-    cross.push(sweepStrip(smp, -E - RW, -E, drop, { dy2: top }));
+    const ns = Math.max(2, Math.ceil(s1 - s0)), nl = Math.ceil(2 * E);
+    const grid = [];
+    for (let a = 0; a <= ns; a++) {
+      const s = s0 + ((s1 - s0) * a) / ns, row = [];
+      const yR = route.heightAtS(s) + 0.15; // ciuperca sinei - 1 cm = cota asfaltului impusa
+      for (let b = 0; b <= nl; b++) {
+        route.offsetPoint(s, -E + (2 * E * b) / nl, _o);
+        row.push([_o.x, slabY(_o.x, _o.z, yR), _o.z]);
+      }
+      grid.push(row);
+    }
+    for (let a = 0; a < ns; a++) for (let b = 0; b < nl; b++) {
+      const A = grid[a][b], B = grid[a][b + 1], C = grid[a + 1][b], D = grid[a + 1][b + 1];
+      slabPos.push(...A, ...C, ...B, ...B, ...C, ...D);
+    }
+    // fetele de capat (dala -> platforma inierbata de dedesubt)
+    for (const [row, sg] of [[grid[0], -1], [grid[ns], 1]]) {
+      const yb = route.heightAtS(sg < 0 ? s0 : s1) - 0.02;
+      for (let b = 0; b < nl; b++) {
+        const A = row[b], B = row[b + 1], A2 = [A[0], yb, A[2]], B2 = [B[0], yb, B[2]];
+        slabEnds.push(...A, ...A2, ...B, ...B, ...A2, ...B2);
+      }
+    }
   }
-  if (cross.length) {
-    const crossMat = new THREE.MeshStandardMaterial({ color: 0x4b4e53, roughness: 0.92, ...PO });
-    const cm = new THREE.Mesh(merge(cross, { color: false }), crossMat);
+  if (slabPos.length) {
+    const sg = new THREE.BufferGeometry();
+    sg.setAttribute('position', new THREE.Float32BufferAttribute([...slabPos, ...slabEnds], 3));
+    sg.computeVertexNormals();
+    const crossMat = new THREE.MeshStandardMaterial({ color: 0x55585d, roughness: 0.92, side: THREE.DoubleSide, ...PO });
+    const cm = new THREE.Mesh(sg, crossMat);
     cm.name = 't1-treceri-la-nivel';
     cm.receiveShadow = true;
     group.add(cm);
   }
+  const signals = buildCrossingSignals(ctx, zones, edge);
+  if (signals) group.add(signals.group);
 
   // ---------- traverse (instantiate) ----------
   // culoarul CF: traverse de beton la 0,6 m (ca liniile CFR); in rest (cale inierbata) la 1,25 m
@@ -217,6 +269,7 @@ export function buildTrack(ctx, route, mats) {
     const r = ramp(s);
     for (const side of [-1, 1]) {
       if (side === 1 && r < 0.02) continue; // linie simpla
+      if (inLevel(s)) continue; // cale inglobata: fara traverse vizibile
       route.offsetPoint(s, side * TRACK_HALF * r, v);
       v.y += 0.0;
       m4.compose(v, q4, one);
@@ -235,7 +288,9 @@ export function buildTrack(ctx, route, mats) {
     if (route.kindAt(s) === 2 && s - lastPier > 22) {
       // nu in albia paraului (podul trece peste apa dintr-o singura deschidere)
       const nearStream = (route.streams || []).some((st) => Math.abs(s - st.s) < 7);
-      if (!nearStream) { pierPos.push(s); lastPier = s; }
+      // nici pe carosabilul de sub pasajele T1 (Str. Prisacii, DJ208)
+      const onRoad = [-2.6, 0, 2.6].some((d) => { route.offsetPoint(s, d, tg); return ctx.city?.roadHeightAt?.(tg.x, tg.z, route.terrainAtS(s)) != null; });
+      if (!nearStream && !onRoad) { pierPos.push(s); lastPier = s; }
     }
   }
   if (pierPos.length) {
@@ -266,5 +321,74 @@ export function buildTrack(ctx, route, mats) {
 
   ctx.env.onChange((st) => { ledMat.emissiveIntensity = 0.25 + st.night * 2.2; });
 
-  return { group, ledMat };
+  return { group, ledMat, signals };
 }
+
+// Semnalizarea trecerilor la nivel T1 (zonele 'nivel' din route.js), pe fiecare sens al drumului:
+//  - linie de oprire alba pe banda de apropiere, la 3 m inainte de dala;
+//  - stalp cu doua lumini rosii intermitente + crucea Sf. Andrei, la 0,8 m in afara carosabilului;
+//  - semibariera scurta (doar peste banda de apropiere) cand drumul e DJ / DN sau colector (> 30 km/h).
+function buildCrossingSignals(ctx, zones, edge) {
+  const RH = ctx.city?.roadHeightAt;
+  const H = ctx.terrain.heightAt;
+  const parts = [], lines = [], lamps = [];
+  const list = [];
+  const MAJOR = ['trunk', 'primary', 'secondary', 'trunk_link', 'primary_link', 'secondary_link'];
+  const yr = (x, z) => { const r = RH ? RH(x, z, H(x, z)) : null; return r != null ? r : H(x, z) + 0.1; };
+  for (const c of zones) {
+    if (c.type !== 'nivel' || !(c.dx === c.dx)) continue;
+    const sin = Math.max(0.35, Math.sin(((c.ang || 90) * Math.PI) / 180));
+    const cos = Math.sqrt(1 - sin * sin);
+    const hw = c.hw || 3;
+    const E = edge(c.s) + 0.25;
+    const major = /^D[JN]/.test(c.ref || '') || MAJOR.includes(c.k);
+    // distanta (de-a lungul drumului) de la centru pana la 3 m inainte de marginea dalei, pe banda din dreapta
+    const a = E / sin + (hw / 2) * (cos / sin) + 3;
+    for (const sg of [-1, 1]) {
+      // vehiculele vin dinspre +sg*d spre centru; dreapta directiei de mers m = -sg*d este (-mz, mx)
+      const rx = sg * c.dz, rz = -sg * c.dx;
+      const cx = c.x + sg * c.dx * a, cz = c.z + sg * c.dz * a;
+      const yaw = Math.atan2(c.dx, c.dz);
+      const lx = cx + (rx * hw) / 2, lz = cz + (rz * hw) / 2;
+      lines.push(box(hw - 0.3, 0.01, 0.4, 0, 0, 0, 0xf4f4f0).rotateY(yaw).translate(lx, yr(lx, lz) + 0.012, lz));
+      const px = cx + rx * (hw + 0.8), pz = cz + rz * (hw + 0.8), py = yr(px, pz);
+      const M = new THREE.Matrix4().makeRotationY(yaw + (sg > 0 ? 0 : Math.PI)).setPosition(px, py, pz);
+      parts.push(cyl(0.06, 0.07, 3.2, 8, 0, 1.6, 0, 0xe8e8e8).applyMatrix4(M));
+      parts.push(box(0.9, 0.36, 0.12, 0, 2.55, 0, 0x1c1f24).applyMatrix4(M));
+      for (const d of [-0.25, 0.25]) lamps.push(new THREE.SphereGeometry(0.1, 10, 6).translate(d, 2.55, 0.08).applyMatrix4(M));
+      for (const r of [Math.PI / 5, -Math.PI / 5]) parts.push(tint(new THREE.BoxGeometry(1.15, 0.16, 0.03).rotateZ(r).translate(0, 3.0, 0.02).applyMatrix4(M), 0xf2f2f2));
+      if (major) {
+        // semibariera: suport + brat alb-rosu (ridicat; lungimea = banda de apropiere)
+        parts.push(box(0.3, 1.0, 0.3, 0, 0.5, -0.35, 0xd9d9d9).applyMatrix4(M));
+        const len = Math.max(2, hw - 0.4);
+        for (let k = 0; k < 5; k++) {
+          const seg = new THREE.BoxGeometry(0.09, len / 5, 0.06).translate(0, len / 10 + (k * len) / 5 + 0.95, -0.35);
+          parts.push(tint(seg.applyMatrix4(M), k % 2 ? 0xffffff : 0xd32222));
+        }
+      }
+    }
+    list.push({ s: c.s, n: c.n, major });
+  }
+  if (!list.length) return null;
+  const group = new THREE.Group();
+  group.name = 't1-semnalizare-treceri';
+  const pole = new THREE.Mesh(merge(parts), new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.6, metalness: 0.2 }));
+  pole.name = 't1-semnale';
+  pole.castShadow = true;
+  const lineMesh = new THREE.Mesh(merge(lines), new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.8, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -16 }));
+  lineMesh.name = 't1-linii-oprire';
+  const lampMat = new THREE.MeshStandardMaterial({ color: 0x5a0a0a, emissive: 0xff2a1a, emissiveIntensity: 0.15 });
+  const lampMesh = new THREE.Mesh(merge(lamps, { color: false }), lampMat);
+  lampMesh.name = 't1-semnale-lumini';
+  group.add(pole, lineMesh, lampMesh);
+  // luminile clipesc alternativ cat timp un tramvai e la < 120 m de trecere
+  let acc = 0;
+  ctx.addUpdate((dt) => {
+    acc += dt;
+    const veh = ctx.transit?.fleet?.vehicles || [];
+    const near = veh.some((v) => list.some((c) => Math.abs((v.s ?? -1e9) - c.s) < 120));
+    lampMat.emissiveIntensity = near ? (Math.floor(acc * 2) % 2 ? 2.4 : 0.3) : 0.15;
+  });
+  return { group, list };
+}
+

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { rng, pointInPoly, bboxOf, canvasTexture } from './util.js';
+import { ROUTE } from '../transit/route-data.js';
 
 // Copaci instantiati: 4 specii (foioase cu coroana lata, foioase mici/rotunde, conifere, plopi).
 // Fiecare specie = UN InstancedMesh (trunchi + coroana in aceeasi geometrie => 4 apeluri de desenare in total).
@@ -182,6 +183,38 @@ function buildingGrid(footprints, cell = 60) {
   };
 }
 
+// benzi interzise copacilor: autostrada / santierul A7–A8 + bretelele (latimea desenata / 2 + 2 m) si
+// platforma liniei T1 (axa ± 5 m). Grila de segmente => test rapid pe ~13 000 de copaci.
+function corridorGrid(roadRuns, cell = 50) {
+  const grid = new Map();
+  const add = (a, b, r) => {
+    const s = [a[0], a[1], b[0], b[1], r];
+    for (let i = Math.floor((Math.min(a[0], b[0]) - r) / cell); i <= Math.floor((Math.max(a[0], b[0]) + r) / cell); i++) {
+      for (let j = Math.floor((Math.min(a[1], b[1]) - r) / cell); j <= Math.floor((Math.max(a[1], b[1]) + r) / cell); j++) {
+        const k = i + ',' + j; let l = grid.get(k); if (!l) grid.set(k, l = []); l.push(s);
+      }
+    }
+  };
+  for (const w of roadRuns) {
+    if (!(w.k === 'construction' || w.k.startsWith('motorway'))) continue;
+    const r = (w.width || 8) / 2 + 2;
+    for (let i = 0; i < w.pts.length - 1; i++) add(w.pts[i], w.pts[i + 1], r);
+  }
+  const T1 = ROUTE?.pts || [];
+  for (let i = 0; i < T1.length - 1; i++) add(T1[i], T1[i + 1], 5);
+  return (x, z) => {
+    const l = grid.get(Math.floor(x / cell) + ',' + Math.floor(z / cell));
+    if (!l) return false;
+    for (const [ax, az, bx, bz, r] of l) {
+      const dx = bx - ax, dz = bz - az, L2 = dx * dx + dz * dz || 1;
+      const u = Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / L2));
+      const ex = ax + dx * u - x, ez = az + dz * u - z;
+      if (ex * ex + ez * ez <= r * r) return true;
+    }
+    return false;
+  };
+}
+
 /**
  * @param points [[x, z, areaKind], ...] – puncte in paduri / parcuri (deja filtrate de okTree)
  * @param roadRuns tronsoanele de drum (pts, k, width, bridge) – pentru copacii de aliniament
@@ -191,6 +224,8 @@ export function buildTrees(ctx, { group, points, terrainH, okTree, roadRuns = []
   // ---- copaci de aliniament pe strazile rezidentiale (deterministi, rari) ----
   const street = [];
   const inBuilding = buildingGrid(footprints);
+  const inCorridor = corridorGrid(roadRuns);
+  let corridorDropped = 0;
   const STREET_K = { residential: 'street', living_street: 'street', tertiary: 'street', secondary: 'street-major', primary: 'street-major', unclassified: 'street-major' };
   for (const w of roadRuns) {
     if (street.length >= MAX_STREET) break;
@@ -211,6 +246,7 @@ export function buildTrees(ctx, { group, points, terrainH, okTree, roadRuns = []
           if (r() > (kind === 'street' ? 0.42 : 0.5)) continue;
           const x = bx + nx * off * sd, z = bz + nz * off * sd;
           if (inExcluded(x, z) || !okTree(x, z) || inBuilding(x, z, 2.2)) continue;
+          if (inCorridor(x, z)) { corridorDropped++; continue; }
           street.push([x, z, kind]);
         }
       }
@@ -220,7 +256,12 @@ export function buildTrees(ctx, { group, points, terrainH, okTree, roadRuns = []
   // ---- distribuim pe specii ----
   const all = [];
   const nArea = Math.min(points.length, MAX_TREES - street.length);
-  for (let i = 0; i < nArea; i++) all.push(points[Math.floor((i / nArea) * points.length)]);
+  for (let i = 0; i < nArea; i++) {
+    const pt = points[Math.floor((i / nArea) * points.length)];
+    if (inBuilding(pt[0], pt[1], 1.5)) continue; // nu in / lipit de cladiri (ex. curtea Palatului Cantacuzino)
+    if (inCorridor(pt[0], pt[1])) { corridorDropped++; continue; } // nu pe autostrada / bretele / platforma T1
+    all.push(pt);
+  }
   all.push(...street);
   const bySp = Object.fromEntries(SPECIES.map((s) => [s, []]));
   for (const [x, z, k] of all) bySp[pickSpecies(k, r)].push([x, z, k]);
@@ -257,5 +298,5 @@ export function buildTrees(ctx, { group, points, terrainH, okTree, roadRuns = []
   }
   ctx.addUpdate?.((dt, t) => { WIND.uTime.value = t; });
   const tris = meshes.reduce((a, m) => a + (m.geometry.attributes.position.count / 3) * m.count, 0);
-  return { meshes, count: total, street: street.length, triangles: tris };
+  return { meshes, count: total, street: street.length, triangles: tris, corridorDropped };
 }

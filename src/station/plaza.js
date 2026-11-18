@@ -14,11 +14,74 @@ export const ZONES = {
   bikeShelter: [-21, -103, -9, -97.5],
   busIsland: [-20.2, 10, -15.6, 54],
   battery: [70, -57.6, 82.4, -50.8],
-  busLane: [-29.6, 6, -23.4, 60],
-  taxiLane: [-29.6, -112, -23.4, -73],
+  busLane: [-29.6, -5.2, -23.4, 67],  // z -5,2 … 6 si 60 … 67 = colturile spre bretelele de iesire / intrare
+  taxiLane: [-29.6, -112, -23.4, -65], // z -73 … -65 = coltul spre breteaua de intrare taxi / kiss & ride
 };
+// Bretelele carosabile dintre Str. Garii (axa la x ≈ -45, carosabil 8 m) si benzile garii, peste fosta fasie T1.
+// Pornesc de sub carosabilul strazii (x = -44, cota drumului orasului) si urca lin (≈ 2,3 %) pana la cota benzilor
+// (PAVE_Y + 0,02) la x = -29,6. [z0, z1] in sistemul local; autobuzele / taxiurile intra pe la sud si ies pe la nord.
+export const LINKS = {
+  busOut: [-5.2, 2.8],   // iesire autobuze: in prelungirea Str. Ceferistilor (axa z ≈ -1,2, 8 m) => intersectie in cruce
+  busIn: [57, 67],       // intrare autobuze dinspre Str. Garii
+  taxiOut: [-112, -104], // iesire taxi / kiss & ride (capatul de nord al benzii)
+  taxiIn: [-73, -65],    // intrare taxi / kiss & ride
+};
+export const LINK_X0 = -44, LINK_X1 = -29.6, KERB_R = 3;
+// asfaltul fiecarei bretele se prelungeste cu KERB_R sub insula verde vecina (colturile rotunjite = raze de bordura);
+// breteaua de iesire taxi nu are insula la nord (z < -112 = teren) => capatul de nord se opreste la bordura (z -112).
+export const LINK_EXT = { taxiOut: [0, KERB_R] };
+export const linkSpan = (k) => { const [z0, z1] = LINKS[k], [e0, e1] = LINK_EXT[k] || [KERB_R, KERB_R]; return [z0 - e0, z1 + e1]; };
+// insulele verzi din fosta fasie T1 (x -41,8 … -30) intre bretele: [z0, z1]
+export const VERGES = [[-104, -73], [-65, -35], [-23, -5.2], [2.8, 57]];
+export const VERGE_X = [-41.8, -30];
+// banda taxi / kiss & ride (sens unic spre nord): culoar de mers x -29,6 … -26, locuri lungi langa bordura x -26 … -23,4
+export const TAXI_BAY_X = -26, EV_BAYS = [-110.5, -105.5, -100.5, -95.5, -90.5], TAXI_RANK = [-90.5, -82.5, -73.5];
+export const TAXI_PARK_X = -24.7, TAXI_HEAD_Z = -88, TAXI_STOP_Z = -77.5; // taxiul parcat (capul statiei) / oprirea taxiurilor animate
+// azi: aleile reale de acces ale parcarii (OSM 1392353509, 876279681, 876279682) – [z axa, latime]
+export const TODAY_ALLEYS = [[-102.9, 6], [-46.8, 6], [44.6, 6]];
+const ROAD_Y = 0.095; // putin sub carosabilul orasului (teren 0 + 0,10) => strada il acopera la imbinare
+const smooth = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t));
+// cota bretelei la x (local); aceeasi pentru toate bretelele (azi si viitor)
+export const linkY = (x) => ROAD_Y + (PAVE_Y + 0.02 - ROAD_Y) * smooth((x + 41) / (LINK_X1 + 41));
+// cota suprafetei carosabile a garii in (x, z) local, sau null (pentru vehiculele animate)
+export function driveY(x, z, future = true) {
+  const links = future ? Object.keys(LINKS).map(linkSpan) : TODAY_ALLEYS.map(([zc, w]) => [zc - w / 2, zc + w / 2]);
+  if (x >= LINK_X0 - 3 && x <= LINK_X1 && links.some(([a, b]) => z >= a && z <= b)) return Math.max(0.1, linkY(x));
+  if (x > LINK_X1 - 0.5 && x < -5 && z > -112.5 && z < 67.5) return PAVE_Y + 0.02;
+  return null;
+}
+
+// suprafata carosabila in panta (de-a lungul lui x), uv in metri / tile
+function rampGeo(x0, z0, x1, z1, yFn, tile = 4) {
+  const n = Math.max(2, Math.ceil(Math.abs(x1 - x0) / 1.5));
+  const g = new THREE.PlaneGeometry(Math.abs(x1 - x0), Math.abs(z1 - z0), n, 1);
+  g.rotateX(-Math.PI / 2);
+  g.translate((x0 + x1) / 2, 0, (z0 + z1) / 2);
+  const p = g.attributes.position, uv = g.attributes.uv;
+  for (let i = 0; i < p.count; i++) { p.setY(i, yFn(p.getX(i))); uv.setXY(i, p.getX(i) / tile, -p.getZ(i) / tile); }
+  g.computeVertexNormals();
+  return g;
+}
+// insula verde cu bordura (de la teren pana la `top`), colturi rotunjite r = [NV, NE, SE, SV] (raze, 0 = drept)
+function vergeMesh(M, x0, z0, x1, z1, top, r) {
+  const s = new THREE.Shape();
+  // forma in (x, -z): z0 = nord = sus in forma
+  const [rNW, rNE, rSE, rSW] = r;
+  s.moveTo(x0 + rNW, -z0);
+  s.lineTo(x1 - rNE, -z0); if (rNE) s.absarc(x1 - rNE, -z0 - rNE, rNE, Math.PI / 2, 0, true);
+  s.lineTo(x1, -z1 + rSE); if (rSE) s.absarc(x1 - rSE, -z1 + rSE, rSE, 0, -Math.PI / 2, true);
+  s.lineTo(x0 + rSW, -z1); if (rSW) s.absarc(x0 + rSW, -z1 + rSW, rSW, -Math.PI / 2, -Math.PI, true);
+  s.lineTo(x0, -z0 - rNW); if (rNW) s.absarc(x0 + rNW, -z0 - rNW, rNW, Math.PI, Math.PI / 2, true);
+  const g = new THREE.ExtrudeGeometry(s, { depth: top, bevelEnabled: false, curveSegments: 6 });
+  g.rotateX(-Math.PI / 2);
+  const uv = g.attributes.uv;
+  for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) / 2, uv.getY(i) / 2);
+  const m = new THREE.Mesh(g, [M.grass, M.concrete]);
+  m.name = 'insula-verde'; m.castShadow = false; m.receiveShadow = true;
+  return m;
+}
 // gradini de ploaie [x0, z0, x1, z1] (sistemul local): bordura +0,2 m, apa in mijloc. Nimic nu se aseaza in ele.
-export const RAIN_GARDENS = [[-58.4, 9, -54.6, 18], [-58.4, 24, -54.6, 33], [-58.4, 38, -54.6, 46.5], [-58.4, -24, -54.6, -14], [-26.8, -8, -23.2, 4]];
+export const RAIN_GARDENS = [[-58.4, 9, -54.6, 18], [-58.4, 24, -54.6, 33], [-58.4, 38, -54.6, 46.5], [-58.4, -24, -54.6, -14], [-22.4, -8, -18.8, 4]]; // ultima: mutata la est de banda autobuzelor (coltul bretelei)
 
 export function buildPlaza(ctx, M, root, atlas, totemTex, boardTex = null) {
   const future = new THREE.Group(); future.name = 'piata-viitor';
@@ -52,17 +115,43 @@ export function buildPlaza(ctx, M, root, atlas, totemTex, boardTex = null) {
   const carCols = [0x9aa4ae, 0x7a1f1f, 0x1f3a5a, 0xe5e7eb, 0x2f2f2f];
   [-96, -91, -83, -75, -69, 9, 18, 24, 31, 36].forEach((z, i) => cars.push({ x: -20.8, y: Y, z: z + 1.3, ry: Math.PI / 2 + (i % 2) * Math.PI, color: carCols[i % carCols.length] }));
   addCars(today, M, cars, 'masini-parcate');
+  // azi: aleile de acces din Str. Garii (rampa de la cota strazii la cota parcarii) + marginea parcarii spre fasia verde
+  for (const [zc, w] of TODAY_ALLEYS) {
+    T.add(M.asphalt, rampGeo(LINK_X0, zc - w / 2, -29.9, zc + w / 2, linkY));
+    for (const sg of [-1, 1]) T.aabb(M.concrete, -40, 0, zc + sg * (w / 2) - 0.1, -30, linkY(-30) - 0.01, zc + sg * (w / 2) + 0.1);
+  }
+  T.aabb(M.concrete, -30.15, 0, -112, -30, Y, 60);
+  T.aabb(M.concrete, -30, 0, -112.15, -5, Y, -112);
+  T.aabb(M.concrete, -30, 0, 60, -5, Y, 60.15);
   const oldLamps = [];
   for (let z = -100; z < 40; z += 24) oldLamps.push({ x: -28.5, y: Y, z, ry: Math.PI / 2 });
   instancedPair(today, GEO.lampPole, M.dark, GEO.lampHead, M.lamp, oldLamps, { name: 'stalpi-azi' });
+  // azi: statia de autobuz de pe Str. Garii (fara insula; autobuzele opresc pe carosabil, pe banda spre nord)
+  T.aabb(M.concrete, -40.4, 0, 15.5, -38.2, 0.12, 21.5);            // platforma de asteptare la bordura
+  T.aabb(M.dark, -39.45, 0.12, 16.95, -39.35, 2.7, 17.05);         // stalp
+  T.aabb(M.white, -39.42, 2.15, 16.65, -39.38, 2.65, 17.35);       // placuta „Stație autobuz”
+  T.aabb(M.dark, -39.0, 0.12, 18.5, -38.6, 0.55, 20.5);            // banca
 
   // ---------------- benzi carosabile (bus / taxi) in viitor ----------------
   // benzile carosabile stau la 2 cm peste pavaj, marcajele la 3,5 cm => fara „z-fighting” din vederea aeriana
   for (const k of ['busLane', 'taxiLane']) { const [a, b, c, d] = ZONES[k]; B.hquad(M.asphalt, a, b, c, d, Y + 0.02, 4); } // banda autobuze / kiss & ride + taxi
-  for (const [z0, z1] of [[6, 60], [-112, -73]]) {
-    for (let z = z0; z < z1; z += 4) B.aabb(M.white, -26.55, Y + 0.02, z, -26.45, Y + 0.035, z + 2);
-    B.aabb(M.concrete, -23.4, Y, z0, -23.2, Y + 0.14, z1); // bordura
-  }
+  for (let z = 6; z < 57; z += 4) B.aabb(M.white, -26.55, Y + 0.02, z, -26.45, Y + 0.035, z + 2); // axa benzii autobuzelor
+  // banda taxi (sens unic): linia continua a locurilor de langa bordura, despartitoare verzi (EV) si galbene (taxi)
+  B.aabb(M.white, TAXI_BAY_X - 0.06, Y + 0.02, EV_BAYS[0], TAXI_BAY_X + 0.06, Y + 0.035, TAXI_RANK[2]);
+  for (const z of EV_BAYS) B.aabb(M.ledGreen, TAXI_BAY_X, Y + 0.02, z - 0.06, -23.5, Y + 0.035, z + 0.06);
+  for (const z of TAXI_RANK.slice(1)) B.aabb(M.binPlastic, TAXI_BAY_X, Y + 0.02, z - 0.06, -23.5, Y + 0.035, z + 0.06);
+  for (let z = TAXI_RANK[0] + 1; z < TAXI_RANK[2] - 1; z += 2.4) B.aabb(M.binPlastic, -25.2, Y + 0.02, z, -24.2, Y + 0.035, z + 0.12); // „TAXI” (dungi)
+  // borduri: latura insulei / pietonala (x = -23,4) si capetele colturilor (z 67 / z -65 / z -112)
+  B.aabb(M.concrete, -23.4, 0, -5.2, -23.2, Y + 0.14, 67.2);
+  B.aabb(M.concrete, -23.4, 0, -112.2, -23.2, Y + 0.14, -65);
+  B.aabb(M.concrete, -29.6, Y, -65, -23.2, Y + 0.14, -64.8);
+  B.aabb(M.concrete, -29.6, 0, -112.2, -23.2, Y + 0.14, -112);
+  // bordura de nord a bretelei de iesire taxi (urmeaza panta bretelei, +12 cm), de la marginea Str. Garii (x -41)
+  for (let x = -41; x < LINK_X1 - 0.01; x += 1) B.aabb(M.concrete, x, 0, LINKS.taxiOut[0] - 0.2, Math.min(LINK_X1, x + 1), linkY(Math.min(LINK_X1, x + 1)) + 0.12, LINKS.taxiOut[0]);
+  // margini verticale ale platformei garii spre teren (nord z -112, sud z 60 … 67) – fara „placa plutitoare”
+  B.aabb(M.concrete, -30, 0, -112.15, -5, Y + 0.02, -112);
+  B.aabb(M.concrete, -30, 0, 67, -23.2, Y + 0.14, 67.2);
+  B.aabb(M.concrete, -23.2, 0, 60, -5, Y, 60.15);
   // marcaje "BUS" / "TAXI" (dungi)
   for (const z of [14, 30, 46]) B.aabb(M.binPlastic, -28.8, Y + 0.02, z - 1.8, -24.2, Y + 0.035, z - 1.6);
 
@@ -101,33 +190,39 @@ export function buildPlaza(ctx, M, root, atlas, totemTex, boardTex = null) {
   //  · breteaua de iesire a autobuzelor spre Str. Garii / Str. Ceferistilor (z ≈ 1 … 11)
   //  · breteaua de intrare dinspre Str. Garii (z ≈ 57 … 67)
   //  · gazon cu arbori, iar in dreptul usii holului (z -35 … -23) pavaj pietonal spre trecerea de pietoni
-  for (const [z0, z1] of [[1, 11], [57, 67]]) {
-    B.hquad(M.asphalt, -42, z0, -29.6, z1, Y + 0.02, 4);
-    for (let x = -41; x < -30.5; x += 3) B.aabb(M.white, x, Y + 0.02, (z0 + z1) / 2 - 0.06, x + 1.5, Y + 0.035, (z0 + z1) / 2 + 0.06);
+  // bretele: asfalt in panta, prelungit cu KERB_R sub insulele verzi (se vede in colturile rotunjite = raze de bordura)
+  for (const [key, [z0, z1]] of Object.entries(LINKS)) {
+    const [za, zb] = linkSpan(key);
+    B.add(M.asphalt, rampGeo(LINK_X0, za, LINK_X1 + 0.01, zb, linkY));
+    const zc = (z0 + z1) / 2;
+    for (let x = -39.5; x < -31; x += 3) B.add(M.white, rampGeo(x, zc - 0.06, x + 1.5, zc + 0.06, (xx) => linkY(xx) + 0.012, 1)); // axa intrerupta
+    if (/Out$/.test(key)) B.add(M.white, rampGeo(-40.6, z0 + 0.3, -40.3, z1 - 0.3, (xx) => linkY(xx) + 0.012, 1)); // linia de oprire: doar pe bretelele de iesire (cele de intrare sunt sens unic spre gara)
   }
   B.hquad(M.paving, -42, -35, -30, -23, Y, 1.6);
+  B.aabb(M.concrete, -42.15, 0, -35, -42, Y, -23);
   P.floor(-42, -35, -30, -23, Y);
-  const verge = [[-112, -35], [-23, 1], [11, 57]];
+  const verge = VERGES;
+  const linkEdge = (z) => Object.values(LINKS).some(([a, b]) => Math.abs(z - a) < 0.01 || Math.abs(z - b) < 0.01);
   for (const [z0, z1] of verge) {
-    B.aabb(M.concrete, -41.8, Y - 0.05, z0 + 0.2, -30.2, Y + 0.12, z1 - 0.2);
-    B.hquad(M.grass, -41.6, z0 + 0.4, -30.4, z1 - 0.4, Y + 0.125, 2);
+    const rN = linkEdge(z0) ? KERB_R : 0, rS = linkEdge(z1) ? KERB_R : 0;
+    future.add(vergeMesh(M, VERGE_X[0], z0, VERGE_X[1], z1, Y + 0.12, [rN, rN * 0.6, rS * 0.6, rS]));
   }
   // ---------------- kiss & ride, taxi, statii de incarcare EV ----------------
   const evs = [];
-  for (const z of [-108, -103, -98, -93]) evs.push({ x: -22.8, y: Y, z, ry: -Math.PI / 2 });
+  for (let i = 0; i < 4; i++) evs.push({ x: -22.8, y: Y, z: (EV_BAYS[i] + EV_BAYS[i + 1]) / 2, ry: -Math.PI / 2 }); // in dreptul locurilor EV
   const ev = instanced(GEO.evCharger, M.white, evs, { name: 'statii-ev' });
   future.add(ev);
   for (const e of evs) B.aabb(M.ledGreen, e.x - 0.16, Y + 1.2, e.z - 0.12, e.x - 0.14, Y + 1.45, e.z + 0.12);
-  for (let z = -110; z < -91; z += 5) B.aabb(M.ledGreen, -28.9, Y + 0.02, z, -24.1, Y + 0.035, z + 0.1);
   addSign(B, M, atlas, 'ev', -22.8, 2.8, -100.5, -Math.PI / 2, 2.0, 0.5);
   addSign(B, M, atlas, 'taxi', -22.8, 2.8, -82, -Math.PI / 2, 2.0, 0.5);
   B.aabb(M.steel, -22.83, Y, -82.03, -22.77, 2.55, -81.97);
   B.aabb(M.steel, -22.83, Y, -100.53, -22.77, 2.55, -100.47);
-  // doua masini electrice la incarcat (langa bordura cu statiile) si un taxi in statia de taxi
+  // doua masini electrice la incarcat (in locurile EV, langa statii) si un taxi in capul statiei de taxi
+  // (celelalte doua taxiuri circula: intra din Str. Garii, asteapta 30 s in locul din spate, vezi buses.js)
   const evCars = [
-    { x: -24.6, y: Y + 0.02, z: -106, ry: Math.PI, color: 0xe5e7eb },
-    { x: -24.6, y: Y + 0.02, z: -96, ry: Math.PI, color: 0x1f6f8b },
-    { x: -24.6, y: Y + 0.02, z: -84, ry: Math.PI, color: 0xfacc15, taxi: true },
+    { x: TAXI_PARK_X, y: Y + 0.02, z: (EV_BAYS[0] + EV_BAYS[1]) / 2, ry: Math.PI, color: 0xe5e7eb },
+    { x: TAXI_PARK_X, y: Y + 0.02, z: (EV_BAYS[2] + EV_BAYS[3]) / 2, ry: Math.PI, color: 0x1f6f8b },
+    { x: TAXI_PARK_X, y: Y + 0.02, z: TAXI_HEAD_Z, ry: Math.PI, color: 0xfacc15, taxi: true },
   ];
   addCars(future, M, evCars, 'masini-ev-taxi');
 
@@ -174,7 +269,7 @@ export function buildPlaza(ctx, M, root, atlas, totemTex, boardTex = null) {
   // banci in piata: in culoarele dintre gradinile de ploaie, cu fata spre gradina (niciodata in apa)
   const benches = [];
   for (const [z, ry] of [[-27, 0], [-10.5, Math.PI], [6.2, 0], [21, Math.PI], [35.5, 0]]) benches.push({ x: -56.5, y: Y, z, ry });
-  for (const z of [-6, 0, 6]) benches.push({ x: -21.7, y: Y, z: z - 2, ry: Math.PI / 2 }); // la 1,3 m de bordura gradinii de ploaie
+  for (const z of [-6, 0, 6]) benches.push({ x: -17.3, y: Y, z: z - 2, ry: Math.PI / 2 }); // la 1,3 m de bordura gradinii de ploaie
   for (const z of [-76, -64, -52]) benches.push({ x: 84.5, y: Y, z, ry: -Math.PI / 2 });
   instancedPair(future, GEO.benchWood, M.seatWood, GEO.benchSteel, M.steel, benches, { name: 'banci-piata' });
   // statie bike-sharing
@@ -220,7 +315,7 @@ export function buildPlaza(ctx, M, root, atlas, totemTex, boardTex = null) {
   // ---------------- stalpi inteligenti (LED, senzori, camera, Wi-Fi) ----------------
   const lamps = [];
   // rand vest al curtii: la x -29,8 (in afara benzilor carosabile, care incep la -29,6)
-  for (let z = -104; z < 60; z += 18) if ((z < -72 || z > -44) && Math.abs(z - 4) > 3) lamps.push({ x: -29.8, y: Y, z, ry: Math.PI / 2 });
+  for (let z = -104; z < 60; z += 18) if ((z < -72 || z > -44) && verge.some(([a, b]) => z > a + 3.5 && z < b - 3.5)) lamps.push({ x: -30.6, y: Y + 0.12, z, ry: Math.PI / 2 });
   // piata verde: randul de langa Str. Garii ocoleste statia de bike-sharing (z -28 … -14) si punctul de colectare (z 7 … 10)
   for (const z of [-29.5, -7, 4.6, 25, 42]) lamps.push({ x: -50.2, y: Y, z, ry: -Math.PI / 2 });
   for (let z = -26; z < 47; z += 17) lamps.push({ x: -62.6, y: Y, z, ry: Math.PI / 2 });
@@ -267,6 +362,7 @@ export function buildPlaza(ctx, M, root, atlas, totemTex, boardTex = null) {
       { name: 'rezervor-apa-pluviala', r: [-14.3, -59.8, -11.7, -54.3] },
       { name: 'stocare-baterii', r: [ZONES.battery[0] - 1, ZONES.battery[1] - 1, ZONES.battery[2] + 1, ZONES.battery[3] + 1] },
       { name: 'insula-autogara', r: ZONES.busIsland },
+      { name: 'statie-autobuz-azi', r: [-40.4, 15.5, -38.2, 21.5] },
       { name: 'parcare-biciclete', r: [ZONES.bikeShelter[0] - 0.3, ZONES.bikeShelter[1] - 0.4, ZONES.bikeShelter[2] + 0.3, ZONES.bikeShelter[3] + 0.4] },
       ...[[-27.4, -35.6], [-50.6, -9.5], [60.0, -60.0]].map(([x, z]) => ({ name: 'totem', r: [x - 0.3, z - 0.7, x + 0.3, z + 0.7] })),
       ...[[-22.8, -82], [-22.8, -100.5], [-50.2, -12.8], [60.2, -76]].map(([x, z]) => ({ name: 'stalp-semn', r: [x - 0.1, z - 0.1, x + 0.1, z + 0.1] })),

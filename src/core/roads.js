@@ -153,7 +153,7 @@ export function buildRoads(ctx, { osm, group, heightAt, terrainH, inTrackField, 
     }
   }
 
-  return { roadRuns, roadIndex, lampRuns, roadMeshes, roadHeightAt, bridges, setSatelliteMode, droppedNearRail, clippedPts, pierCount: st.pierCount };
+  return { roadRuns, roadIndex, lampRuns, roadMeshes, roadHeightAt, bridges, setSatelliteMode, droppedNearRail, clippedPts, pierCount: st.pierCount, bridgePiers: st.piers || [] };
 }
 
 // ---------- Cai ferate in stratul orasului: balast + traverse + 2 sine ----------

@@ -9,6 +9,7 @@ import { buildAirports } from './airports.js';
 import { createRide } from './ride.js';
 import { addTransitInfo } from './hotspots.js';
 import { buildBridgeAccess } from './bridge-access.js';
+import { buildHubLink } from './hub-link.js';
 
 // Modulul "Transport": tramvaiul usor T1 Gara Pascani -> Hub Turbion A7xA8, nodul turbion A7 x A8,
 // hub-ul de mobilitate si marcarea liniilor spre aeroporturile Iasi / Suceava / Bacau.
@@ -49,6 +50,8 @@ export async function build(ctx) {
   let motorway = null;
   try { motorway = buildMotorways(ctx, shared, route); } catch (e) { console.error('A7/A8', e); }
   const hub = buildHub(ctx, route, shared);
+  let hubLink = null;
+  try { hubLink = buildHubLink(ctx, motorway, hub, shared); } catch (e) { console.error('Legatura hub – nod', e); }
   let airports = null;
   try { airports = buildAirports(ctx, motorway, hub, route); } catch (e) { console.error('Aeroporturi', e); }
 
@@ -105,7 +108,7 @@ export async function build(ctx) {
 
   console.info(`Transport construit in ${Math.round(performance.now() - t0)} ms; cursa T1 ${Math.round(fleet.tripTime / 60)} min`);
   return {
-    route, fleet, track, motorway, hub, airports, stops, bridgeAccess,
+    route, fleet, track, motorway, hub, hubLink, airports, stops, bridgeAccess,
     startRide: () => ride.startRide(),
     stopRide: () => ride.stopRide(),
     ride,

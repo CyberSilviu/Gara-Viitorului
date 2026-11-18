@@ -26,6 +26,7 @@ export function buildStops(ctx, route, fleet, shared) {
   group.name = 't1-statii';
   const stops = route.stops;
   const plat = [], tactile = [], steel = [], wood = [], pv = [], glass = [], glow = [], bins = [];
+  const walk = [], coll = []; // modul plimbare: peroane (walkables) + obstacole (colliders), invizibile
   const displays = [];
   // amprentele mobilierului (pentru verificari: nimic in apa / pe carosabil / in cladiri) – {stop, kind, x, y, z, r}
   const props = [];
@@ -44,7 +45,10 @@ export function buildStops(ctx, route, fleet, shared) {
       const Mc = new THREE.Matrix4().makeBasis(rr, new THREE.Vector3(0, 1, 0), rr.clone().cross(new THREE.Vector3(0, 1, 0))).setPosition(c0.x, c0.y, c0.z);
       // stalpii stau pe peroane (± 4,9 m), nu pe carosabilul strazii de langa terminal
       for (const dz of [-8, 8]) {
-        for (const sx of [-1, 1]) steel.push(box(0.3, 7.4, 0.3, sx * 4.9, 2.5, dz, 0x475569).applyMatrix4(Mc)); // fundatie in peron
+        for (const sx of [-1, 1]) {
+          steel.push(box(0.3, 7.4, 0.3, sx * 4.9, 2.5, dz, 0x475569).applyMatrix4(Mc)); // fundatie in peron
+          coll.push(box(0.45, 7.4, 0.45, sx * 4.9, 2.5, dz).applyMatrix4(Mc));
+        }
         steel.push(box(10.2, 0.35, 0.35, 0, 6.05, dz, 0x475569).applyMatrix4(Mc));
         steel.push(box(0.12, 1.05, 0.12, 0, 5.4, dz, 0x475569).applyMatrix4(Mc));
       }
@@ -111,6 +115,12 @@ export function buildStops(ctx, route, fleet, shared) {
       const dmB = new THREE.Matrix4().makeTranslation(1.25, 0, 3.7 - 0.065);
       disp.applyMatrix4(dm); dispB.applyMatrix4(dmB);
       add(steel, box(1.6, 0.92, 0.12, 1.25, 2.35, 3.7, 0x111827));
+      // plimbare: peronul (suprafata invizibila) + coliziuni pentru adapost / banca / validator / afisaj / cosuri
+      walk.push(sweepStrip(smp, Math.min(a, b), Math.max(a, b), H));
+      add(coll, box(0.95, 2.4, 8.7, W - 0.64, 1.2, 0));
+      add(coll, box(0.35, 1.5, 0.3, 1.35, 0.75, -3.7));
+      add(coll, box(0.25, 2.0, 0.25, 1.25, 1.0, 3.7));
+      add(coll, box(0.5, 0.9, 2.1, W - 0.45, 0.45, -5.65));
       if (!displays[si]) displays[si] = { geos: [], st };
       displays[si].geos.push(disp.applyMatrix4(M), dispB.applyMatrix4(M));
     }
@@ -135,6 +145,11 @@ export function buildStops(ctx, route, fleet, shared) {
   addMesh(glass, shared.glassMat, 't1-sticla', { color: false });
   const glowMat = new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false });
   addMesh(glow, glowMat, 't1-validatoare');
+  // plimbare: mesh-uri vizibile (visible = true) cu material invizibil => raycast-ul le gaseste
+  const wk = addMesh(walk, new THREE.MeshBasicMaterial({ visible: false, side: THREE.DoubleSide }), 't1-peroane-plimbare', { color: false });
+  if (wk) ctx.walkables.push(wk);
+  const cl = addMesh(coll, new THREE.MeshBasicMaterial({ visible: false }), 't1-coliziuni', { color: false });
+  if (cl) ctx.colliders.push(cl);
 
   // ----- afisaje dinamice -----
   const dispList = [];
