@@ -221,8 +221,31 @@ export function buildBridgeStructures({ items, profiles, bridges, groundY, terra
   const t1 = avoidT1 ? t1Index() : null;
   const railD = (x, z) => (railIndex ? railIndex.nearest(x, z, 12).d : Infinity);
   const t1D = (x, z) => (t1 ? t1.nearest(x, z, 12).d : Infinity);
+  // drumurile de sub poduri (nu tablierele): nicio pila pe carosabil (garda 1 m)
+  const onBridge = new Set(bridges.map((b) => b.idx));
+  const RG = 20, rgrid = new Map();
+  items.forEach((it, idx) => {
+    if (onBridge.has(idx) || !it.pts || it.pts.length < 2) return;
+    const hw = (it.width || 6) / 2 + 1.0;
+    for (let i = 0; i < it.pts.length - 1; i++) {
+      const [ax, az] = it.pts[i], [bx, bz] = it.pts[i + 1], sg = { ax, az, bx, bz, hw };
+      for (let gx = Math.floor((Math.min(ax, bx) - hw) / RG); gx <= Math.floor((Math.max(ax, bx) + hw) / RG); gx++)
+        for (let gz = Math.floor((Math.min(az, bz) - hw) / RG); gz <= Math.floor((Math.max(az, bz) + hw) / RG); gz++) {
+          const k = gx + ',' + gz; let a = rgrid.get(k); if (!a) rgrid.set(k, (a = [])); a.push(sg);
+        }
+    }
+  });
+  const onRoadBelow = (x, z) => {
+    for (const g of rgrid.get(Math.floor(x / RG) + ',' + Math.floor(z / RG)) || []) {
+      const vx = g.bx - g.ax, vz = g.bz - g.az, l2 = vx * vx + vz * vz || 1;
+      const t = Math.max(0, Math.min(1, ((x - g.ax) * vx + (z - g.az) * vz) / l2));
+      if (Math.hypot(x - g.ax - vx * t, z - g.az - vz * t) < g.hw) return true;
+    }
+    return false;
+  };
   const pierOk = (x, z) => {
     if (railD(x, z) < RAIL_CLEAR) return false;
+    if (onRoadBelow(x, z)) return false;
     if (t1D(x, z) < T1_CLEAR) return false;
     if (waterIndex) { const nw = waterIndex.nearest(x, z, 40); if (nw.seg && nw.d < nw.seg.r + 2) return false; }
     return true;

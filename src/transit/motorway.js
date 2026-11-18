@@ -100,6 +100,17 @@ export function buildMotorways(ctx, shared, route = null) {
     }
     return false;
   };
+  // pila / stalp la sol pe carosabilul unui drum al orasului (+0,5 m) sau in gabaritul CF (< 2,6 m de axa) – audit TO-DO 7–9
+  const cityRoads = ctx.city?.roadIndex, cityRails = ctx.city?.railIndex;
+  const onCityWay = (x, z, rad) => {
+    if (cityRails && cityRails.nearest(x, z, rad + 6).d < rad + 2.6) return true;
+    let hit = false;
+    cityRoads?.query({ minX: x - rad - 25, maxX: x + rad + 25, minZ: z - rad - 25, maxZ: z + rad + 25 }, (s) => {
+      const vx = s.bx - s.ax, vz = s.bz - s.az, u = Math.max(0, Math.min(1, ((x - s.ax) * vx + (z - s.az) * vz) / (vx * vx + vz * vz || 1)));
+      return (hit = Math.hypot(s.ax + vx * u - x, s.az + vz * u - z) < s.r - 1.2 + rad + 0.5);
+    });
+    return hit;
+  };
   const quadSide = (arr, sd, a, b, c, d) => { if (sd > 0) arr.push(...b, ...d, ...a, ...a, ...d, ...c); else arr.push(...a, ...c, ...b, ...b, ...c, ...d); };
   for (const w of ways) {
     const smp = samplesOf(w);
@@ -141,7 +152,7 @@ export function buildMotorways(ctx, shared, route = null) {
       if (bridge) {
         const sMid = (p.s + q.s) / 2;
         const x = (p.x + q.x) / 2, z = (p.z + q.z) / 2, top = (p.y + q.y) / 2 - DECK;
-        if ((w.lastPier === undefined || sMid - w.lastPier > 30) && top - Math.min(p.t, q.t) > 1 && !roadBelow(x, z, top + DECK, w)) {
+        if ((w.lastPier === undefined || sMid - w.lastPier > 30) && top - Math.min(p.t, q.t) > 1 && !roadBelow(x, z, top + DECK, w) && !onCityWay(x, z, 1.0)) {
           w.lastPier = sMid;
           pierMats.push({ x, z, top, bot: Math.min(p.t, q.t) - 1.5, yaw: Math.atan2(p.rx, p.rz) + Math.PI / 2, w: w.width * 0.55 });
         }
@@ -171,7 +182,7 @@ export function buildMotorways(ctx, shared, route = null) {
         // stalpul sta in spatele parapetului (fata exterioara la hw + 0,5 m): la 1,7 m de marginea carosabilului,
         // si la >= 1,2 m de marginea ORICAREI alte cai (bretele alaturate, zone de convergenta)
         const lx = p.x + p.rx * (hw + 1.7), lz = p.z + p.rz * (hw + 1.7);
-        if (laneClash(lx, lz, p.y, w)) continue;
+        if (laneClash(lx, lz, p.y, w) || roadBelow(lx, lz, p.y + 0.5, w) || onCityWay(lx, lz, 0.4)) continue;
         last = p.s;
         lampPos.push({ x: lx, y: p.y, z: lz, yaw: Math.atan2(p.rx, p.rz) });
       }

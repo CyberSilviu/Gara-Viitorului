@@ -9,6 +9,12 @@ import { analyseRoads } from './road-clear.js';
 
 export const TRACK_HALF = 1.7;     // jumatate din entraxul liniilor duble (3,4 m)
 export const TERM_STUB = 95;       // lungimea capatului cu linie simpla la terminale (s de la capete)
+// la gara, linia ramane simpla pe toata lungimea peronului 1 (pana la s ~ 110), ca linia dubla sa nu intre in peron
+export const TERM_STUB_GARA = 180;
+export const DECK_DEPTH = 1.6;     // grosimea tablierului sub platforma (fata laterala a podului in track.js)
+export const ROAD_CLEARANCE = 5.0; // gabaritul minim sub tablier, peste asfalt
+const VIADUCT_JOIN = 300;          // traversari mai apropiate de atat => un singur viaduct continuu
+const RAIL_TOP = 0.16;             // ciuperca sinei peste platforma
 
 export function createRoute(ctx) {
   const H = ctx.terrain.heightAt;
@@ -36,7 +42,7 @@ export function createRoute(ctx) {
   };
   let y = avg(t, 40);
   // drumurile / CF ale orasului peste care trece platforma (vezi road-clear.js): cota minima a platformei
-  const rampAt = (s) => smooth(TERM_STUB - 60, TERM_STUB, s) * smooth(TERM_STUB - 60, TERM_STUB, L - s);
+  const rampAt = (s) => smooth(TERM_STUB_GARA - 60, TERM_STUB_GARA, s) * smooth(TERM_STUB - 60, TERM_STUB, L - s);
   // podul rutier DN28A (Vatra) trece PESTE linia T1 (puntea ~7 m peste sine e a modulului orasului):
   // drumul de deasupra nu ridica platforma T1 => o scoatem din analiza pe +-60 m in jurul podului
   const osm0 = ctx.city?.osm;
@@ -88,101 +94,73 @@ export function createRoute(ctx) {
   for (let i = 0; i < N; i++) y[i] = Math.max(y[i], minY[i], need[i], need[Math.max(0, i - 1)], need[Math.min(N - 1, i + 1)]);
   grade(y);
 
-  // ---- T1 × drumuri (TO-DO 2): fiecare loc unde axa taie / calca un drum desenat de oras primeste un tratament ----
-  //  - „pasaj”: profilul (dictat de relief + panta max 3,5 %) trece > 2 m peste drum => pod T1 cu gabarit 4,7 m
-  //    (cota sinei >= asfalt + 5,6 m); pilele nu se pun pe carosabil (track.js);
-  //  - „nivel”: trecere la nivel => profilul T1 e FIXAT la cota asfaltului (ctx.city.roadHeightAt): ciuperca sinei
-  //    la +1 cm peste asfalt, dala de cale inglobata (track.js) continua suprafata drumului; rampe <= 3,5 %;
-  //  - „inglobat”: axa calca pe drum fara sa-l taie (DJ208L relocat, ~6°) => cale inglobata in carosabil, la fel.
+  // ---- T1 × drumuri (TO-DO 9): TOATE traversarile sunt DENIVELATE (fara treceri la nivel / cale inglobata) ----
+  // Fiecare loc unde platforma T1 taie sau calca un drum desenat de oras (inclusiv drumurile noi „in constructie”)
+  // devine pod T1: tablierul (grosime DECK_DEPTH sub platforma) are gabarit >= ROAD_CLEARANCE peste asfaltul de
+  // dedesubt pe toata latimea platformei (+-4 m in lungul liniei); rampele raman <= 3,5 % (grade() doar ridica).
+  // Pilele nu se pun pe carosabil (track.js). Traversarile apropiate (< VIADUCT_JOIN m) => UN viaduct continuu.
+  // Exceptie: podul rutier DN28A trece PESTE T1 (scos din analiza mai sus).
   const RH = ctx.city?.roadHeightAt;
-  const RAIL_TOP = 0.16, FLUSH = 0.01, PASAJ = 5.6;
   const roadY = (x, z, hint) => { const v = RH ? RH(x, z, hint) : null; return v == null ? NaN : v; };
   const yAt = (s) => { const [i, f] = idx(s); return y[i] + (y[i + 1] - y[i]) * f; };
-  const tAtS = (s) => { const [i, f] = idx(s); return t[i] + (t[i + 1] - t[i]) * f; };
-  const xing = roads.crossings.filter((c) => !c.pinned);
-  for (const c of xing) {
-    const r = roadY(c.x, c.z, tAtS(c.s));
-    c.road = r === r ? r : c.y;
-    c.ang = Math.round((Math.asin(Math.min(1, c.sin)) * 180) / Math.PI);
-    c.dhBefore = yAt(c.s) + RAIL_TOP - c.road;
-    c.type = c.dhBefore > 2 ? 'pasaj' : 'nivel';
-    if (c.type === 'pasaj') {
-      for (let i = 0; i < N; i++) if (S[i] > c.s0 - 4 && S[i] < c.s1 + 4) {
-        const ri = roadY(P[i][0], P[i][1], t[i]);
-        y[i] = Math.max(y[i], Math.max(c.road, ri === ri ? ri : -Infinity) + PASAJ - RAIL_TOP);
-      }
-    }
-  }
-  grade(y);
-  // esantioane pe asfalt in afara trecerilor (si departe de podul DN28A) => cale inglobata
-  const inX = (s, pad = 2) => xing.some((c) => s > c.s0 - pad && s < c.s1 + pad);
+  const edgeAt = (s) => TRACK_HALF * rampAt(s) + 1.97;
+  // cota maxima a asfaltului de sub platforma (axa + margini) la esantionul i (NaN = nu e drum dedesubt)
+  const roadUnder = (i) => {
+    const A = P[Math.max(0, i - 1)], B = P[Math.min(N - 1, i + 1)];
+    const tl = Math.hypot(B[0] - A[0], B[1] - A[1]) || 1, rx = -(B[1] - A[1]) / tl, rz = (B[0] - A[0]) / tl, e = edgeAt(S[i]);
+    let m = NaN;
+    for (const f of [-1, -0.5, 0, 0.5, 1]) { const v = roadY(P[i][0] + rx * e * f, P[i][1] + rz * e * f, t[i]); if (v === v && !(m >= v)) m = v; }
+    return m;
+  };
   const dnS = ROUTE.dn28a ?? -1e9;
-  const pin = new Float32Array(N).fill(NaN);
-  const zones = [];
-  for (const c of xing) if (c.type === 'nivel') zones.push({ ...c, type: 'nivel' });
+  const nameAt = (x, z) => {
+    let bd = Infinity, r = { n: '', ref: '', k: '' };
+    for (const w of osm0?.roads || []) for (let j = 0; j < (w.p || []).length - 1; j++) {
+      const a = w.p[j], b = w.p[j + 1], dx = b[0] - a[0], dz = b[1] - a[1], l2 = dx * dx + dz * dz || 1;
+      const u = Math.max(0, Math.min(1, ((x - a[0]) * dx + (z - a[1]) * dz) / l2));
+      const d = Math.hypot(a[0] + dx * u - x, a[1] + dz * u - z);
+      if (d < bd) { bd = d; r = { n: w.n || '', ref: w.ref || '', k: w.k }; }
+    }
+    return r;
+  };
+  const xing = roads.crossings.map((c) => ({ ...c }));
+  // portiuni in care platforma calca pe asfalt in afara unei traversari (drum aproape paralel) => tot pod
   {
+    const inX = (s) => xing.some((c) => s > c.s0 - 2 && s < c.s1 + 2);
     let cur = null;
-    for (let i = 0; i < N; i++) {
-      const on = !inX(S[i]) && Math.abs(S[i] - dnS) > 60 && roadY(P[i][0], P[i][1], t[i]) === roadY(P[i][0], P[i][1], t[i]);
+    for (let i = 0; i <= N; i++) {
+      const ru = i < N ? roadUnder(i) : NaN;
+      const on = i < N && !inX(S[i]) && Math.abs(S[i] - dnS) > 60 && ru === ru;
       if (on && !cur) cur = { i0: i, i1: i };
       else if (on) cur.i1 = i;
-      if ((!on || i === N - 1) && cur) {
-        if (S[cur.i1] - S[cur.i0] >= 8) {
-          const m = Math.round((cur.i0 + cur.i1) / 2);
-          const ri = roadY(P[m][0], P[m][1], t[m]);
-          zones.push({ type: 'inglobat', s: S[m], s0: S[cur.i0] - 2, s1: S[cur.i1] + 2, x: P[m][0], z: P[m][1], road: ri, n: '', k: '', ang: 0, dhBefore: y[m] + RAIL_TOP - ri });
-        }
+      if (!on && cur) {
+        const m = Math.round((cur.i0 + cur.i1) / 2), nm = nameAt(P[m][0], P[m][1]);
+        // lipit de o traversare (ex. restul amprentei unui drum oblic) => o extindem pe aceea
+        const adj = xing.find((c) => !c.paralel && S[cur.i0] - 10 < c.s1 && S[cur.i1] + 10 > c.s0);
+        if (adj) { adj.s0 = Math.min(adj.s0, S[cur.i0] - 2); adj.s1 = Math.max(adj.s1, S[cur.i1] + 2); if (nm.n && !(adj.n || '').includes(nm.n)) adj.n = adj.n ? adj.n + ' + ' + nm.n : nm.n; cur = null; continue; }
+        xing.push({ s: S[m], s0: S[cur.i0] - 2, s1: S[cur.i1] + 2, x: P[m][0], z: P[m][1], y: roadUnder(m), sin: 0, n: nm.n || nm.ref, ref: nm.ref, k: nm.k, paralel: true });
         cur = null;
       }
     }
   }
-  // numele drumului pentru zonele inglobate (cel mai apropiat segment OSM)
-  for (const z of zones) if (z.type === 'inglobat' && osm0) {
-    let bd = Infinity;
-    for (const w of osm0.roads || []) for (let j = 0; j < (w.p || []).length - 1; j++) {
-      const a = w.p[j], b = w.p[j + 1], dx = b[0] - a[0], dz = b[1] - a[1], l2 = dx * dx + dz * dz || 1;
-      const u = Math.max(0, Math.min(1, ((z.x - a[0]) * dx + (z.z - a[1]) * dz) / l2));
-      const d = Math.hypot(a[0] + dx * u - z.x, a[1] + dz * u - z.z);
-      if (d < bd) { bd = d; z.n = w.n || ''; z.ref = w.ref || ''; z.k = w.k; const ta = P[Math.min(N - 1, Math.round(z.s / step) + 1)], tb = P[Math.max(0, Math.round(z.s / step) - 1)]; const tl = Math.hypot(ta[0] - tb[0], ta[1] - tb[1]) || 1, ql = Math.sqrt(l2); z.ang = Math.round(Math.asin(Math.min(1, Math.abs(((ta[0] - tb[0]) * dz - (ta[1] - tb[1]) * dx) / (tl * ql)))) * 180 / Math.PI); z.dx = dx / ql; z.dz = dz / ql; }
+  xing.sort((a, b) => a.s - b.s);
+  for (const c of xing) {
+    const r = roadY(c.x, c.z, t[Math.min(N - 1, Math.round(c.s / step))]);
+    c.road = r === r ? r : c.y;
+    c.ang = Math.round((Math.asin(Math.min(1, c.sin)) * 180) / Math.PI);
+    c.dhBefore = yAt(c.s) + RAIL_TOP - c.road;
+    c.type = 'pod';
+    for (let i = 0; i < N; i++) if (S[i] > c.s0 - 4 && S[i] < c.s1 + 4) {
+      const ru = roadUnder(i);
+      y[i] = Math.max(y[i], Math.max(c.road, ru === ru ? ru : -Infinity) + DECK_DEPTH + ROAD_CLEARANCE + 0.05);
     }
   }
-  zones.sort((a, b) => a.s - b.s);
-  // cota impusa in zona: asfaltul de sub axa (interpolat unde axa iese de pe asfalt)
-  for (const z of zones) {
-    const ids = [];
-    for (let i = 0; i < N; i++) if (S[i] >= z.s0 && S[i] <= z.s1) ids.push(i);
-    const v = ids.map((i) => roadY(P[i][0], P[i][1], t[i]));
-    const known = ids.map((_, k) => k).filter((k) => v[k] === v[k]);
-    ids.forEach((i, k) => {
-      let r = v[k];
-      if (!(r === r)) {
-        if (!known.length) r = z.road;
-        else {
-          let a = -1, b = -1;
-          for (const kk of known) { if (kk < k) a = kk; if (kk > k && b < 0) b = kk; }
-          r = a < 0 ? v[b] : b < 0 ? v[a] : v[a] + ((v[b] - v[a]) * (k - a)) / (b - a);
-        }
-      }
-      pin[i] = r - RAIL_TOP + FLUSH;
-    });
-  }
-  // con de panta +-3,5 % in jurul cotelor impuse (rampele de racordare)
-  {
-    const hi = new Float32Array(N).fill(Infinity), lo = new Float32Array(N).fill(-Infinity);
-    for (let i = 0; i < N; i++) if (pin[i] === pin[i]) { hi[i] = lo[i] = pin[i]; }
-    for (let i = 1; i < N; i++) { const d = G * (S[i] - S[i - 1]); hi[i] = Math.min(hi[i], hi[i - 1] + d); lo[i] = Math.max(lo[i], lo[i - 1] - d); }
-    for (let i = N - 2; i >= 0; i--) { const d = G * (S[i + 1] - S[i]); hi[i] = Math.min(hi[i], hi[i + 1] + d); lo[i] = Math.max(lo[i], lo[i + 1] - d); }
-    for (let i = 0; i < N; i++) {
-      if (pin[i] === pin[i]) y[i] = pin[i];
-      else y[i] = lo[i] > hi[i] ? (lo[i] + hi[i]) / 2 : Math.min(hi[i], Math.max(lo[i], y[i]));
-    }
-  }
-  // tabel de control
-  for (const c of [...xing.filter((c) => c.type === 'pasaj'), ...zones]) c.dhAfter = yAt(c.s) + RAIL_TOP - c.road;
-  const xTable = [...xing.filter((c) => c.type === 'pasaj'), ...zones].sort((a, b) => a.s - b.s);
-  if (xTable.length) {
-    const rows = xTable.map((c) => `  s ${String(Math.round(c.s)).padStart(4)} | ${((c.ref ? c.ref + ' ' : '') + (c.n && c.n !== c.ref ? c.n : '') || c.k).padEnd(32).slice(0, 32)} | ${String(c.ang).padStart(2)}° | Δh ${c.dhBefore >= 0 ? '+' : ''}${c.dhBefore.toFixed(2)} -> ${c.dhAfter >= 0 ? '+' : ''}${c.dhAfter.toFixed(2)} m | ${c.type}`);
-    console.info(`T1 × drumuri (${xTable.length}; Δh = ciuperca sinei – asfalt):\n${rows.join('\n')}`);
+  grade(y);
+  // gabaritul obtinut (minimul pe portiunea de drum de sub tablier)
+  for (const c of xing) {
+    let m = Infinity;
+    for (let i = 0; i < N; i++) if (S[i] >= c.s0 - 1 && S[i] <= c.s1 + 1) { const ru = roadUnder(i); m = Math.min(m, y[i] - DECK_DEPTH - (ru === ru ? Math.max(ru, c.road) : c.road)); }
+    c.clearance = m;
   }
 
   let maxGrade = 0;
@@ -195,6 +173,38 @@ export function createRoute(ctx) {
     let k = h > 4.5 ? 2 : h > 0.7 ? 1 : 0;
     for (const st of streams) if (Math.abs(S[i] - st.s) < 16) k = 2;
     kind[i] = k;
+  }
+  // pod peste fiecare drum (tablier + parapet pe toata zona, nicio bordura / taluz pe asfalt)
+  for (const c of xing) for (let i = 0; i < N; i++) if (S[i] > c.s0 - 6 && S[i] < c.s1 + 6) kind[i] = 2;
+  // traversari apropiate (ex. Prisacii – DJ208 – Varful Dealului): un singur viaduct continuu, fara rambleu intre ele
+  const viaducts = [];
+  for (const c of xing) {
+    const v = viaducts[viaducts.length - 1];
+    if (v && c.s0 - v.s1 < VIADUCT_JOIN) { v.s1 = Math.max(v.s1, c.s1); v.list.push(c); } else viaducts.push({ s0: c.s0, s1: c.s1, list: [c] });
+  }
+  for (const v of viaducts) {
+    let ok = v.list.length > 1;
+    for (let i = 0; i < N && ok; i++) if (S[i] > v.s0 && S[i] < v.s1 && y[i] - t[i] < 1.5) ok = false;
+    if (ok) for (let i = 0; i < N; i++) if (S[i] > v.s0 - 6 && S[i] < v.s1 + 6) kind[i] = 2;
+    v.continuous = ok;
+  }
+  // capetele viaductelor: prelungite cat timp platforma e la > 4,5 m (fara rambleu inalt lipit de culee)
+  for (let i = 1; i < N; i++) if (kind[i] !== 2 && kind[i - 1] === 2 && y[i] - t[i] > 4.5) kind[i] = 2;
+  for (let i = N - 2; i >= 0; i--) if (kind[i] !== 2 && kind[i + 1] === 2 && y[i] - t[i] > 4.5) kind[i] = 2;
+
+  // tabel de control: s, drum, unghi, tratament, gabarit
+  {
+    const rows = xing.map((c) => ({
+      s: c.s, label: ((c.ref ? c.ref + ' ' : '') + (c.n && c.n !== c.ref ? c.n : '')) || c.k, ang: c.paralel ? 'par' : c.ang + '°',
+      tr: viaducts.some((v) => v.continuous && v.list.includes(c)) ? 'viaduct T1' : 'pod T1',
+      cl: `gabarit ${c.clearance.toFixed(2)} m | șină–asfalt ${c.dhBefore >= 0 ? '+' : ''}${c.dhBefore.toFixed(2)} -> +${(yAt(c.s) + RAIL_TOP - c.road).toFixed(2)} m`,
+    }));
+    if (ROUTE.dn28a != null) {
+      const p = P[Math.min(N - 1, Math.round(ROUTE.dn28a / step))], yr = yAt(ROUTE.dn28a) + RAIL_TOP, deck = roadY(p[0], p[1], yr + 8);
+      rows.push({ s: ROUTE.dn28a, label: 'DN28A (pod rutier)', ang: '78°', tr: 'drum PESTE T1', cl: deck === deck && deck > yr + 2 ? `cale pod +${(deck - yr).toFixed(2)} m peste șină` : 'pod al orașului' });
+    }
+    rows.sort((a, b) => a.s - b.s);
+    console.info(`T1 × drumuri (${rows.length}, toate denivelate; panta max ${(maxGrade * 100).toFixed(2)} %):\n` + rows.map((r) => `  s ${String(Math.round(r.s)).padStart(4)} | ${r.label.padEnd(30).slice(0, 30)} | ${String(r.ang).padStart(3)} | ${r.tr.padEnd(13)} | ${r.cl}`).join('\n'));
   }
 
   // ---- interogare dupa s ----
@@ -231,7 +241,7 @@ export function createRoute(ctx) {
 
   // deplasarea laterala a liniei unui sens (0 la capete = linie simpla, +-1.7 pe linia dubla)
   function laneRamp(s) {
-    return smooth(TERM_STUB - 60, TERM_STUB, s) * smooth(TERM_STUB - 60, TERM_STUB, L - s);
+    return smooth(TERM_STUB_GARA - 60, TERM_STUB_GARA, s) * smooth(TERM_STUB - 60, TERM_STUB, L - s);
   }
 
   // punct cu deplasare laterala (dreapta = +) fata de axa; dreapta orizontala = (-tz, tx)
@@ -262,13 +272,15 @@ export function createRoute(ctx) {
   }
 
   const stops = ROUTE.stops.map((st) => ({ ...st }));
-  // un peron nu are voie sa acopere o trecere la nivel (strada care ar intra pe sub peron):
-  // mutam statia cel mult 60 m in lungul liniei, pana unde peronul (± 21 m + 3 m garda) e liber
-  const clearAt = (s) => !roads.crossings.some((c) => c.s1 > s - 24 && c.s0 < s + 24);
+  // un peron (± 21 m + 3 m garda) nu acopera o traversare si nu sta pe viaduct (fara scari / lift): mutam statia
+  // in lungul liniei (cel mult 60 m, respectiv 400 m daca era pe viaduct) pana unde peronul e liber si nu e pe pod
+  const clearAt = (s) => !xing.some((c) => c.s1 > s - 24 && c.s0 < s + 24);
+  const gradeAt = (s) => { for (let q = s - 24; q <= s + 24; q += 2) if (kindAt(q) === 2) return false; return true; };
   for (const st of stops) {
-    if (st.term || clearAt(st.s)) continue;
-    for (let d = 2; d <= 60; d += 2) {
-      const cand = [st.s - d, st.s + d].find((s) => s > 130 && s < L - 130 && clearAt(s));
+    if (st.term || (clearAt(st.s) && gradeAt(st.s))) continue;
+    const far = gradeAt(st.s) ? 60 : 400;
+    for (let d = 2; d <= far; d += 2) {
+      const cand = [st.s + d, st.s - d].find((s) => s > 130 && s < L - 130 && clearAt(s) && gradeAt(s));
       if (cand !== undefined) { st.s0 = st.s; st.s = cand; break; }
     }
   }
@@ -279,8 +291,7 @@ export function createRoute(ctx) {
     climb: y[N - 1] - y[0],
     streams,
     corridor: ROUTE.corridor || [0, 0],   // [s0, s1] portiunea in culoarul CF 500 (cale pe balast)
-    // treceri (cu type 'nivel' / 'pasaj') si zonele cu cale inglobata la cota asfaltului (treceri la nivel + 'inglobat')
-    crossings: roads.crossings,
-    levelZones: zones,
+    // traversarile drum × T1 (toate denivelate: type 'pod', cu gabaritul obtinut) si viaductele rezultate
+    crossings: xing, viaducts,
   };
 }

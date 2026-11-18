@@ -259,11 +259,40 @@ const dC = [A.x, A.z];
 const den = dC[0] * HUB_DIR[1] - dC[1] * HUB_DIR[0];
 const tX = ((HUB_END[0] - C0[0]) * HUB_DIR[1] - (HUB_END[1] - C0[1]) * HUB_DIR[0]) / den;
 const X = [C0[0] + dC[0] * tX, C0[1] + dC[1] * tX];
-const lHub = Math.hypot(HUB_END[0] - X[0], HUB_END[1] - X[1]);
+// ---------- 4: traversarea DJ208L (TO-DO 9): T1 NU mai calca pe carosabil ----------
+// DJ208L (Str. Crizantemelor -> Lunca) merge aproape paralel cu aliniamentul hub-ului (~6°). T1 ramane pe latura
+// NV a drumului (la >= semilatime + 4 m), il traverseaza O SINGURA DATA, sub DJ_ANG, pe pod (curba in S cu raza
+// DJ_R), apoi intra pe aliniamentul terminalului (HUB_DIR) pe latura SE, pana la acelasi capat HUB_END.
+const DJ_ANG = 65, DJ_R = 65, DJ_STRAIGHT = 22;   // unghi de traversare (grade), raza curbelor, aliniament peste drum
+const djWay = osm.roads.filter((w) => w.ref === 'DJ208L' && w.k !== 'construction' && w.p.length > 1)
+  .flatMap((w) => w.p.slice(0, -1).map((p, i) => [p, w.p[i + 1]]))
+  .map(([a, b]) => ({ a, b, l: Math.hypot(b[0] - a[0], b[1] - a[1]) }))
+  .filter((g) => g.l > 1)
+  .map((g) => ({ ...g, d: distPS(HUB_END, g.a, g.b) }))
+  .sort((g, h) => g.d - h.d)[0];
+function distPS(p, a, b) {
+  const vx = b[0] - a[0], vz = b[1] - a[1];
+  const t = Math.max(0, Math.min(1, ((p[0] - a[0]) * vx + (p[1] - a[1]) * vz) / (vx * vx + vz * vz || 1)));
+  return Math.hypot(p[0] - a[0] - vx * t, p[1] - a[1] - vz * t);
+}
+const djU = [(djWay.b[0] - djWay.a[0]) / djWay.l, (djWay.b[1] - djWay.a[1]) / djWay.l];
+if (djU[0] * HUB_DIR[0] + djU[1] * HUB_DIR[1] < 0) { djU[0] = -djU[0]; djU[1] = -djU[1]; }
+let djN = [-djU[1], djU[0]];
+const offDJ = (p) => (p[0] - djWay.a[0]) * djN[0] + (p[1] - djWay.a[1]) * djN[1];
+if (offDJ(HUB_END) < 0) djN = [-djN[0], -djN[1]];   // +n = latura terminalului (SE)
+const djA = (DJ_ANG * Math.PI) / 180;
+const djW = [Math.cos(djA) * djU[0] + Math.sin(djA) * djN[0], Math.cos(djA) * djU[1] + Math.sin(djA) * djN[1]];
+const djT = DJ_R * Math.tan(Math.acos(djW[0] * HUB_DIR[0] + djW[1] * HUB_DIR[1]) / 2);
+const half12 = djT + DJ_STRAIGHT / 2;                     // jumatate din V1-V2 (traversarea e la mijloc)
+const d2 = (offDJ(HUB_END) - half12 * Math.sin(djA)) / (HUB_DIR[0] * djN[0] + HUB_DIR[1] * djN[1]);
+const V2 = [HUB_END[0] - HUB_DIR[0] * d2, HUB_END[1] - HUB_DIR[1] * d2];
+const V1 = [V2[0] - djW[0] * 2 * half12, V2[1] - djW[1] * 2 * half12];
+console.log(`DJ208L: traversare unica la ${DJ_ANG}° in (${[0, 1].map((k) => Math.round((V1[k] + V2[k]) / 2))}), V1 (${V1.map(Math.round)}), V2 (${V2.map(Math.round)}), aliniament terminal ${d2.toFixed(0)} m, R ${DJ_R} m`);
+const lHub = Math.hypot(V1[0] - X[0], V1[1] - X[1]);
 let turn = null;
 const HALF = 3.6, CLEAR = 3.0;
 for (const Rr of [600, 500, 420, 360, 300, 250, 200, 160, 120, 90, 70, 60]) {
-  const arc = arcPoints(corridor[corridor.length - 2], X, HUB_END, Rr);
+  const arc = arcPoints(corridor[corridor.length - 2], X, V1, Rr);
   if (arc.T > tX * 0.98 || arc.T > lHub * 0.5) continue;
   const cl = clearanceOf(arc.pts), rd = Math.min(...arc.pts.map((p) => railDist(p[0], p[1])));
   if (!turn || (cl >= HALF + CLEAR && rd >= RAIL_OFF - 0.3)) turn = { Rr, arc, cl, rd };
@@ -273,7 +302,8 @@ console.log(`Varf racordare la (${X.map(Math.round)}), raza ${turn.Rr} m, T = ${
 // culoarul se opreste la inceputul curbei
 const PC = turn.arc.P1;
 const corr2 = corridor.filter((p) => (p[0] - PC[0]) * dC[0] + (p[1] - PC[1]) * dC[1] < -1);
-let pts = resample([...corr2, ...turn.arc.pts, HUB_END], STEP);
+const sArc1 = arcPoints(X, V1, V2, DJ_R), sArc2 = arcPoints(V1, V2, HUB_END, DJ_R);
+let pts = resample([...corr2, ...turn.arc.pts, ...sArc1.pts, ...sArc2.pts, HUB_END], STEP);
 
 const N = pts.length;
 const S = [0];
@@ -338,12 +368,14 @@ const stops = [
   { id: 'electroputere', name: 'Electroputere', s: Math.round(sAt(...toWorld(TERM_X, 600))) },
   { id: 'centru', name: 'Centru – Spital (pod DN28A)', s: dnS - 48 },
   { id: 'triaj', name: 'Triaj', s: Math.round(sAt(...TRIAJ)) },
-  { id: 'stefan', name: 'Ștefan cel Mare', s: 0 },
+  { id: 'stefan', name: 'Vârful Dealului', s: 0 },
   { id: 'hub', name: 'Hub Turbion A7×A8', s: Math.round(LEN - 40), term: true },
 ];
 {
-  const dj = roadsX.find((r) => r.ref === 'DJ208' || /Ștefan cel Mare/.test(r.n));
-  stops.find((s) => s.id === 'stefan').s = dj ? dj.s + 50 : Math.round(LEN * 0.75);
+  // dupa viaductul Prisacii – DJ208 – Varful Dealului (TO-DO 9): statia la sol, dupa ultima traversare
+  // (route.js o muta mai departe daca peronul ar ramane totusi pe viaduct)
+  const vd = roadsX.find((r) => /Vârful Dealului/.test(r.n)) || roadsX.find((r) => r.ref === 'DJ208');
+  stops.find((s) => s.id === 'stefan').s = vd ? vd.s + 70 : Math.round(LEN * 0.75);
 }
 // niciun peron (± 21 m + 3 m garda) peste un drum care traverseaza linia; latimi ca in src/core/city.js
 {

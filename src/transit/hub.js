@@ -377,7 +377,8 @@ export function buildHub(ctx, route, shared) {
   // nucleu (lifturi, grupuri sanitare), ghiseu informatii, banci, plante
   colB(-39, -29, 36, 44, LB, LB + bH);
   colB(-31, -21, 39.4, 40.6, LB, LB + 1.2);
-  for (let u = -30; u <= 20; u += 6) colB(u - 1.65, u + 1.65, 29.6, 30.45, LB, LB + 1.0);
+  // banci: sezut (0,85 m) + spatar separat – calatorii asezati (hub-link) stau pe sezut
+  for (let u = -30; u <= 20; u += 6) { colB(u - 1.65, u + 1.65, 29.6, 30.2, LB, LB + 0.85); colB(u - 1.65, u + 1.65, 30.2, 30.45, LB, LB + 1.0); }
   for (const u of [-34, -12, 8, 26]) colB(u - 0.8, u + 0.8, 21.2, 22.8, LB, LB + 2.6);
   // automate de bilete (langa usile spre peronul T1)
   for (const u of [-11, -9, -7, 7, 9, 11]) {
@@ -404,7 +405,7 @@ export function buildHub(ctx, route, shared) {
   for (let u = -24; u <= 6; u += 6) {
     add('paint', box(3.2, 0.45, 0.6, u, yEt + 0.23, 28, 0x0ea5e9));
     add('paint', box(3.2, 0.5, 0.1, u, yEt + 0.7, 28.3, 0x334155));
-    colB(u - 1.65, u + 1.65, 27.6, 28.45, yEt, yEt + 1.0);
+    colB(u - 1.65, u + 1.65, 27.6, 28.2, yEt, yEt + 0.85); colB(u - 1.65, u + 1.65, 28.2, 28.45, yEt, yEt + 1.0);
   }
 
   // S2: scara etaj -> acoperisul solar (iesire pe acoperis prin golul din placi)

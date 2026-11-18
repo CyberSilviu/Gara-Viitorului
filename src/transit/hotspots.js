@@ -165,10 +165,10 @@ export function addTransitInfo(ctx, { route, fleet, motorway, hub, airports }) {
   add({
     id: 'hub-aeroporturi', category: 'mobility', title: 'Autocare directe spre 3 aeroporturi',
     position: hub.coachBay.clone().add(V(0, 9, 0)),
-    what: 'De pe peroanele hub-ului pleacă autocare electrice direct pe autostradă: spre Aeroportul Iași (IAS) pe A8 Est, spre Suceava (SCV) pe A7 Nord și spre Bacău (BCM) pe A7 Sud. Fiecare linie are culoarea ei pe indicatoare, pe afișaje, pe benzile luminoase de pe autostradă și pe harta din aplicație.',
+    what: 'De pe peroanele hub-ului pleacă autocare electrice direct pe autostradă: spre Aeroportul Iași (IAS) pe A8 Est, spre Suceava (SCV) pe A7 Nord și spre Bacău (BCM) pe A7 Sud. Fiecare linie are culoarea ei pe indicatoare, pe afișaje, pe benzile luminoase de pe autostradă și pe harta din aplicație. Autocarele au bretele proprii: spre Suceava și Bacău ies pe breteaua 104 a nodului, iar spre Iași urcă pe un pod nou peste A8 și intră pe A8 Est pe o bandă de accelerare. La întoarcere, autocarele din Suceava și Bacău ies de pe A8 Est pe o buclă, trec înapoi peste autostradă și ajung pe drumul colector al hub-ului.',
     why: 'Pașcaniul este aproape la egală distanță de cele trei aeroporturi ale Moldovei. Nodul turbion este singurul punct din care toate trei se pot atinge direct pe autostradă, fără să treci prin centrul vreunui oraș.',
     benefit: 'Un călător din Pașcani, Târgu Neamț sau Fălticeni ajunge la avion în mai puțin de o oră, la un preț mic și fără să lase mașina zile întregi în parcarea aeroportului. Codurile de culoare fac orientarea simplă și pentru turiștii străini.',
-    data: [['Iași IAS', '81 km · ≈ 55 min · A8 Est'], ['Suceava SCV', '62 km · ≈ 45 min · A7 Nord'], ['Bacău BCM', '91 km · ≈ 60 min · A7 Sud'], ['Frecvență', 'la 30 min (vârf), la 60 min (rest)'], ['Autocare', 'electrice, 50 locuri, Wi-Fi']],
+    data: [['Iași IAS', '81 km · ≈ 55 min · A8 Est'], ['Suceava SCV', '62 km · ≈ 45 min · A7 Nord'], ['Bacău BCM', '91 km · ≈ 60 min · A7 Sud'], ['Frecvență', 'la 30 min (vârf), la 60 min (rest)'], ['Autocare', 'electrice, 50 locuri, Wi-Fi'], ['Bretele hub', 'colector + 4 bretele, 2 poduri peste A8, raze ≥ 60 m, pante ≤ 5 %']],
     view: { position: hub.toWorld(-20, hub.levelB + 22, 115), target: hub.toWorld(-4, hub.levelB + 2, 66) },
   });
   add({

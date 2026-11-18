@@ -198,9 +198,11 @@ export function buildPlaza(ctx, M, root, atlas, totemTex, boardTex = null) {
     for (let x = -39.5; x < -31; x += 3) B.add(M.white, rampGeo(x, zc - 0.06, x + 1.5, zc + 0.06, (xx) => linkY(xx) + 0.012, 1)); // axa intrerupta
     if (/Out$/.test(key)) B.add(M.white, rampGeo(-40.6, z0 + 0.3, -40.3, z1 - 0.3, (xx) => linkY(xx) + 0.012, 1)); // linia de oprire: doar pe bretelele de iesire (cele de intrare sunt sens unic spre gara)
   }
-  B.hquad(M.paving, -42, -35, -30, -23, Y, 1.6);
-  B.aabb(M.concrete, -42.15, 0, -35, -42, Y, -23);
-  P.floor(-42, -35, -30, -23, Y);
+  // pavajul se opreste la marginea panglicii Str. Garii (x ~ -40,7), cu bordura pe margine
+  const PAV_X0 = -40.5;
+  B.hquad(M.paving, PAV_X0, -35, -30, -23, Y, 1.6);
+  B.aabb(M.concrete, PAV_X0 - 0.15, 0, -35, PAV_X0, Y, -23);
+  P.floor(PAV_X0, -35, -30, -23, Y);
   const verge = VERGES;
   const linkEdge = (z) => Object.values(LINKS).some(([a, b]) => Math.abs(z - a) < 0.01 || Math.abs(z - b) < 0.01);
   for (const [z0, z1] of verge) {

@@ -8,6 +8,7 @@ import { createControls } from './core/controls.js';
 import { createHotspots } from './core/hotspots.js';
 import { createUI, setLoading, hideLoader, toast } from './core/ui.js';
 import { createTour } from './core/tour.js';
+import { createPeople } from './core/people.js';
 import { installPresentationExport } from './core/presentation.js';
 import * as geo from './core/geo.js';
 import { STATION_EXCLUDE } from './config/zones.js';
@@ -51,6 +52,7 @@ async function boot() {
 
   ctx.hotspots = createHotspots(ctx);
   ctx.controls = createControls(ctx);
+  ctx.people = createPeople(ctx); // calatori (InstancedMesh) – inainte de gara / transport (vezi src/core/people.js)
 
   setLoading(0.5, 'Construim Gara Viitorului…');
   try {
@@ -63,6 +65,9 @@ async function boot() {
     const transit = await import('./transit/index.js');
     ctx.transit = await transit.build(ctx);
   } catch (e) { console.error('Transport', e); }
+  // calatori: populari amanate (statia T1 din gara) + statiile intermediare T1
+  ctx.people.runDeferred();
+  try { if (ctx.transit?.route) ctx.people.populateRouteStops(ctx.transit.route, { props: ctx.transit.stops?.props }); } catch (e) { console.error('Persoane T1', e); }
 
   // Pasii de inceput si de final ai turului (ceilalti vin din module)
   const turb = geo.place('turbine');

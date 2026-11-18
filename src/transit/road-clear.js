@@ -9,8 +9,8 @@ import { GROUND_LIFT, roadStyle } from '../core/util.js';
 //  - need[i]    = cota minima a platformei (suprafata drumului / CF de dedesubt + garda);
 //  - surf[i]    = cota suprafetei celui mai inalt drum suprapus (NaN daca nu exista);
 //  - onRoad[i]  = 1 daca platforma calca pe un drum (bordura devine perete vertical, nu taluz verde);
-// si lista trecerilor la nivel (drumuri care taie axa sub un unghi > 20°; tratamentul – trecere la nivel cu
-// sina la cota asfaltului sau pasaj – il alege route.js dupa profilul in lung).
+// si lista traversarilor (drumuri care taie axa sub un unghi > 20°); route.js le trece pe TOATE pe pod T1
+// (gabarit >= 5 m sub tablier, TO-DO 9) – nu mai exista treceri la nivel.
 
 // latimile panglicilor (aceleasi ca in src/core/city.js)
 export const ROAD_WIDTH = {
@@ -172,7 +172,7 @@ export function analyseRoads(P, S, osm, H, edgeFn, opts = {}) {
   const merged = [];
   for (const c of crossings) {
     const last = merged[merged.length - 1];
-    if (last && c.s0 <= last.s1 + 1 && last.pinned === c.pinned) { last.s1 = Math.max(last.s1, c.s1); last.y = Math.max(last.y, c.y); if (!last.n && c.n) last.n = c.n; }
+    if (last && c.s0 <= last.s1 + 1 && last.pinned === c.pinned) { last.s1 = Math.max(last.s1, c.s1); last.y = Math.max(last.y, c.y); if (c.n && !(last.n || '').split(' + ').includes(c.n)) last.n = last.n ? last.n + ' + ' + c.n : c.n; }
     else merged.push({ ...c });
   }
   return { need, surf, onRoad, crossings: merged };
@@ -229,6 +229,7 @@ export function t1Pins(osm, route, wayKind, opts = {}) {
         if (nb.d > width / 2 + e + 0.6) continue;
         const sin = Math.abs(ux * nb.tz - uz * nb.tx);
         const cross = sin >= 0.5;
+        if (cross) continue; // traversare: T1 trece pe pod peste drum (route.js) => drumul ramane la cota lui
         pins.push({ x, z, y: route.heightAtS(nb.s) + (cross ? over : -below), r: 6, s: nb.s, name: r.n || r.ref || '', kind: cross ? 'trecere' : 'sub-platforma' });
       }
     }

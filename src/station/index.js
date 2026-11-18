@@ -11,6 +11,7 @@ import { buildPlaza } from './plaza.js';
 import { buildTrains } from './trains.js';
 import { buildBuses } from './buses.js';
 import { addStationInfo, view, walk, OVERVIEW } from './hotspots.js';
+import { addStationPeople } from './people.js';
 
 // Complexul „Gara Viitorului 3 în 1” – Pașcani.
 // Grupul local `root` are originea in centrul cladirii de calatori, +X spre linii (est) si +Z de-a lungul axei (spre SSE).
@@ -73,6 +74,10 @@ export async function build(ctx) {
   }
   setFuture(true);
   ctx.futureToggles.push(setFuture);
+
+  // ---------------- calatori (TO-DO 7): src/station/people.js pe sistemul comun ctx.people ----------------
+  let people = null;
+  try { people = addStationPeople(ctx, { plaza, colliders: { shared: shared.col, future: fut.col, today: tod.col } }); } catch (e) { console.error('Persoane gara', e); }
 
   // ---------------- noapte / zi ----------------
   let night = 0;
@@ -142,7 +147,7 @@ export async function build(ctx) {
   ctx.mapLayers.push({ points: [fb0, fb1], color: '#a855f7', width: 3 });
 
   console.info(`Gara: PV ${pvArea} m² ≈ ${pvKWp} kWp; trenuri ${trains.trains.length}`);
-  return { root, worldGroup, setFuture, trains, tracks, materials: M, plaza: { props: plaza.props, structures: plaza.structures }, get future() { return futureOn; } };
+  return { root, worldGroup, setFuture, people, trains, tracks, materials: M, plaza: { props: plaza.props, structures: plaza.structures }, get future() { return futureOn; } };
 }
 
 // „Azi”: anexele CFR reale care dispar in proiect (anexa de la sud de cladire, in calea autogarii) –
